@@ -50,5 +50,5 @@ MY_DIR_LIST = ['./', './A']
 # 作为系统调用的参数：other
 MY_MNT_POINT = '/mnt/ext3' 
 
-if __name__ == '__main__':
-	print('hhhh')
+# mkfs 所在路径
+MKFS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "specificfs", "xv6fs", "mkfs")

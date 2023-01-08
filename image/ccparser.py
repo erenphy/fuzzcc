@@ -19,6 +19,8 @@ def ccparser_convert_wtpara(para_num):
 		para.append(bintmp[i])
 	# print(para)
 	return para
+
+	
 def cc_parser(mnt_point, syscalls):
 	print("func: parser() is called\n")
 	for cur_syscall in syscalls:

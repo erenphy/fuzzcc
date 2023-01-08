@@ -1,13 +1,9 @@
 #!/usr/local/bin/python3
 import os
 from subprocess import Popen, PIPE
-from hashlib import md5
+from cctools import file_md5_hash
+from globalVar import MKFS_PATH
 
-MKFS_PATH = "./mkfs"
-
-def file_md5_hash(filename):
-    with open(filename, "rb") as f:
-        return md5(f.read()).hexdigest()
 
 def init_fs(fs01_filename, fs02_filename, init_files):
     proc_1 = Popen(f"{MKFS_PATH} {fs01_filename} {init_files}", shell=True, stdout=PIPE, stderr=PIPE)

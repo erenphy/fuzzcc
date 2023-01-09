@@ -9,17 +9,18 @@ import enum, os
 from enum import IntEnum
 import logging
 import time
+import threading
 
 # mkfs 所在路径
 MKFS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "specificfs", "xv6fs", "mkfs")
 
-# 日志记录相关
-log_file = './logfiles/' + time.strftime('%m%d_%H:%M:%S') + '-syscalls.log'
-logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.DEBUG, format='%(asctime)s [%(levelname)s]: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+# 日志记录相关，不知道为什么basicConfig它给我报错，就注释掉了
+log_file = time.strftime('%m%d_%H:%M:%S') + '-syscalls.log'
+# logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.DEBUG, format='%(asctime)s [%(levelname)s]: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 # 暂时设置超时时间为 4
 OUT_OUT_TIME = 4
-# 参数长度?数量?
+# 参数长度，对
 ARG_LENGTH = 3
 
 COUNT = 0
@@ -33,7 +34,8 @@ SEED_QUEUE = JoinableQueue()
 # SEED_QUEUE = Queue() 
 # 每条调用序列
 SYSCALLS = []
-
+#互斥锁
+MUTEX = threading.Lock()
 
 # log_file_handle = open(log_file, 'w')
 # log_file_handle.write('STARTING LOGGing\n')

@@ -13,18 +13,25 @@ from cctools import file_md5_hash
 from ccinit import init_fs
 from ccgenerator import Generator
 
-# TODO 待重构
-def p_mutator(seedq, testcaseq):
-	print("---------------------mutating by" + str(os.getpid()) + '\n')
-	# setproctitle.setproctitle("p_mutator")
-	while True:
-		cur_seed = seedq.get()
-		# if cur_seed == None: break
-		print("mutator: printing cur_seed")
-		print(cur_seed)
-		testcaseq.put(copy.deepcopy(cur_seed))
-		ccmutator.ccmutate_syscalls(testcaseq, cur_seed)
-		seedq.task_done()
+# TODO 待检查
+class Mutator(threading.Thread):
+	def __init__(self, thread_name):
+		super(Mutator, self).__init__(name=thread_name)
+		# self.length=arg_length
+	def mutator(self):
+		print(f"[+] {self.name} working...")
+		global SEED_QUEUE
+		global TESTCASE_QUEUE
+		while not SEED_QUEUE.empty():
+			MUTEX.acquire()
+			cur_seed = SEED_QUEUE.get()
+			MUTEX.release()
+			# if cur_seed == None: break
+			print("mutator: printing cur_seed")
+			print(cur_seed)
+			TESTCASE_QUEUE.put(copy.deepcopy(cur_seed))
+			ccmutate_syscalls(TESTCASE_QUEUE, cur_seed)
+		SEED_QUEUE.join()
 
 # runner() input为单个操作序列， output为执行后的镜像
 def runner(is_kernelfs, fs_type, input):

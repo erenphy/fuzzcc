@@ -11,12 +11,12 @@ import globalVar
 import ccmounter
 from cctools import file_md5_hash
 from ccinit import init_fs
-# 多进程执行，进行种子生成，和种子变异
+# 多线程执行，进行种子生成，和种子变异
 # 以此实现共享testcases
 #  ccgenerator.py---->种子生成
 #  ccmutator.py----->种子变异
-#  ccmounter.py---（在这里没有用到）--> 取测试用例，并执行挂载。需要增加一个收集执行完状态＋比较环节
-#  usage: python3 ccserver.py -k (is_kernel_fs) -T (target img) -t (fs-type) 
+#  runner()-----> 取测试用例，并执行挂载。
+#  usage: python3 ccserver.py -k (is_kernel_fs) -t (fs-type) 
 def p_generator(seedq, arglength):
 	print("---------------generating seed by " + str(os.getpid()) + '\n')
 	# setproctitle.setproctitle("p_generator")
@@ -104,6 +104,7 @@ if __name__ == '__main__':
 	outoftime = 4
 
 	#计数，同时也作为img的命名标志
+	# TODO: 这个需要显式设置为global吗？我在globalVar.py里的定义都没有显式设置全局...
 	global global_count
 	global_count = 1
 
@@ -130,8 +131,8 @@ if __name__ == '__main__':
 	iskfs = args.is_kernel_fs
 	# targetimg = args.targetimg
 	fstype = args.fs_type
-	# output = args.output
-	# 多进程: generator, mutator
+	
+	# TODO：多线程加锁: generator, mutator
 	# BUG 多进程全局变量隔离 --> 需要改多线程, 并对全局变量加锁 / 或者考虑将生成的种子写入文件，muta监听种子输出文件夹状态，读文件进行变异 / 或者依次进行，采用单线程 X --->因为想要有反馈的fuzz,将成功触发不一致的测试用例重新加入种子池，得是一个动态过程
 	gene_pro = Process(target = p_generator, args = (globalVar.SEED_QUEUE, mylength))
 	muta_pro = Process(target = p_mutator, args = (globalVar.SEED_QUEUE, globalVar.TESTCASE_QUEUE), daemon = True)

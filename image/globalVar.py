@@ -1,15 +1,32 @@
+"""
+	global variables defination
+"""
+
 from multiprocessing import JoinableQueue
 from queue import Queue
 from distutils.filelist import FileList
 import enum, os
 from enum import IntEnum
+import logging
 import time
-# global variables defination
+
+# mkfs 所在路径
+MKFS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "specificfs", "xv6fs", "mkfs")
+
+# 日志记录相关
+log_file = './logfiles/' + time.strftime('%m%d_%H:%M:%S') + '-syscalls.log'
+logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.DEBUG, format='%(asctime)s [%(levelname)s]: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+
+# 暂时设置超时时间为 4
+OUT_OUT_TIME = 4
+# 参数长度?数量?
+ARG_LENGTH = 3
+
+COUNT = 0
 
 # 测试用例队列
 # TESTCASE_QUEUE = Queue()
 TESTCASE_QUEUE = JoinableQueue()
-
 
 # 种子队列
 SEED_QUEUE = JoinableQueue() 
@@ -17,11 +34,9 @@ SEED_QUEUE = JoinableQueue()
 # 每条调用序列
 SYSCALLS = []
 
-# 日志文件句柄
-global log_file_handle 
-log_file = './logfiles/' + time.strftime('%m%d_%H:%M:%S') + '-syscalls.log'
-log_file_handle = open(log_file, 'w')
-log_file_handle.write('STARTING LOGGing\n')
+
+# log_file_handle = open(log_file, 'w')
+# log_file_handle.write('STARTING LOGGing\n')
 
 # 用16进制
 @enum.unique
@@ -49,6 +64,3 @@ MY_DIR_LIST = ['./', './A']
 
 # 作为系统调用的参数：other
 MY_MNT_POINT = '/mnt/ext3' 
-
-# mkfs 所在路径
-MKFS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "specificfs", "xv6fs", "mkfs")

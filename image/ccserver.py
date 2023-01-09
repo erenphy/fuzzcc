@@ -144,13 +144,11 @@ if __name__ == '__main__':
 	gene_pro = Generator("generator", ARG_LENGTH)
 
 	gene_pro.start()
-
-	# gene_pro = Process(target = p_generator, args = (SEED_QUEUE, ARG_LENGTH))
-	# muta_pro = Process(target = p_mutator, args = (SEED_QUEUE, TESTCASE_QUEUE), daemon = True)
-
-	# # p_l = [gene_pro, muta_pro, fuzzer_pro]
-	# p_l = [gene_pro, muta_pro]
 	
+	# 不知道为啥不执行变异线程
+	muta_pro = Mutator("mutator")
+
+	muta_pro.start()
 	
 	# # for () 把生成的queue交给ccarser解析并在挂载目录下执行
 	# for cur_seq in TESTCASE_QUEUE:

@@ -5,25 +5,13 @@ import threading
 # import setproctitle
 import copy
 import ccmutator
-from ccgenerator import cc_generator
 import ccparser
 # import globalVar
 import ccmounter
 from globalVar import *
 from cctools import file_md5_hash
 from ccinit import init_fs
-
-# FIXME 待完善
-class Generator(threading.Thread):
-	def __init__(self, thread_name, arg_length):
-		super(Generator, self).__init__(name=thread_name)
-		self.length=arg_length
-	
-	def run(self):
-		print(f"[+] {self.name} working...")
-		global SEED_QUEUE
-		cc_generator(SEED_QUEUE, self.length)
-		SEED_QUEUE.join()
+from ccgenerator import Generator
 
 # TODO 待重构
 def p_mutator(seedq, testcaseq):

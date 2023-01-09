@@ -107,7 +107,10 @@ class Generator(threading.Thread):
 				cur_length = cur_length - 1
 				cur_queue.append(syscall_kv)
 			init_size = init_size - 1
-			logging.warning('Seed----', cur_queue)
+			# 问题:在这里logging会报错
+			# logging.warning('Seed----', cur_queue)
+			#TODO 在这里把种子cur_queue保存起来或者写进log_file_handle
+			# 我用log_file_handle.write('')，实际上日志文件是空的，写不出来
 			MUTEX.acquire()
 			SEED_QUEUE.put(cur_queue)
 			MUTEX.release()

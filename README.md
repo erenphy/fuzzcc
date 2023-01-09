@@ -5,12 +5,12 @@
 - [ ] 重构代码
     - [ ] 文件结构重整
     - [ ] 代码分模块重构
-    - [ ] 改用多线程处理种子的生成与消费
+    - [x] ~~改用多线程处理种子的生成与消费~~
         - python 多线程: https://docs.python.org/zh-cn/3/library/threading.html
         - [互斥锁解决 Python 中多线程共享全局变量的问题](https://zhuanlan.zhihu.com/p/259969195)
     - [ ] 更新README.md
 - [ ] 从 ccserver.py 的 main 函数开始逐步重构
-    - [ ] ccgenerator.py 中 JoinableQueue 改用 Queue
+    - [x] ~~ccgenerator.py 中 JoinableQueue 改用 Queue~~
 
 ## 原理
 

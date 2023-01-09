@@ -3,8 +3,7 @@ import argparse, sys, tempfile
 import logging
 import threading
 # import setproctitle
-import copy
-import ccmutator
+import time
 import ccparser
 # import globalVar
 import ccmounter
@@ -12,26 +11,7 @@ from globalVar import *
 from cctools import file_md5_hash
 from ccinit import init_fs
 from ccgenerator import Generator
-
-# TODO 待检查
-class Mutator(threading.Thread):
-	def __init__(self, thread_name):
-		super(Mutator, self).__init__(name=thread_name)
-		# self.length=arg_length
-	def mutator(self):
-		print(f"[+] {self.name} working...")
-		global SEED_QUEUE
-		global TESTCASE_QUEUE
-		while not SEED_QUEUE.empty():
-			MUTEX.acquire()
-			cur_seed = SEED_QUEUE.get()
-			MUTEX.release()
-			# if cur_seed == None: break
-			print("mutator: printing cur_seed")
-			print(cur_seed)
-			TESTCASE_QUEUE.put(copy.deepcopy(cur_seed))
-			ccmutate_syscalls(TESTCASE_QUEUE, cur_seed)
-		SEED_QUEUE.join()
+from ccmutator import Mutator
 
 # runner() input为单个操作序列， output为执行后的镜像
 def runner(is_kernelfs, fs_type, input):
@@ -149,6 +129,9 @@ if __name__ == '__main__':
 	muta_pro = Mutator("mutator")
 
 	muta_pro.start()
+
+	time.sleep(5)
+	muta_pro.event.set()
 	
 	# # for () 把生成的queue交给ccarser解析并在挂载目录下执行
 	# for cur_seq in TESTCASE_QUEUE:

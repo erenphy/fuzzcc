@@ -7,9 +7,37 @@ import copy
 import globalVar
 import ccgenerator
 import ccsyscalls
+import threading
+from globalVar import *
+
 # 用于种子变异
 # 种子池 pop
 # 测试用例集合 push(种子+种子变异生成的testcase)
+
+class Mutator(threading.Thread):
+	def __init__(self, thread_name):
+		super(Mutator, self).__init__(name=thread_name)
+		self.event = threading.Event()
+	def run(self):
+		print(f"[+] {self.name} working...")
+		global SEED_QUEUE
+		global TESTCASE_QUEUE
+		while True:
+			print("[-] mutator: getting SEED_QUEUE")
+			# 一次性把种子队列里头的种子都取出来，然后阻塞等待信号
+			while not SEED_QUEUE.empty():
+				MUTEX.acquire()
+				cur_seed = SEED_QUEUE.get()
+				MUTEX.release()
+				# if cur_seed == None: break
+				print("mutator: printing cur_seed")
+				print(cur_seed)
+				TESTCASE_QUEUE.put(copy.deepcopy(cur_seed))
+				ccmutate_syscalls(TESTCASE_QUEUE, cur_seed)
+			# 阻塞等待信号
+			self.event.wait()
+			self.event.clear()
+
 
 def ccmutate_wtname(file):
 	print("ccmutate_wtname() is running\n")

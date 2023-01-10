@@ -25,14 +25,15 @@ def usermount(whichfuse, img, mntpoint,option='-f'):
     # print(basepath)
     if whichfuse == 'xv6fs':
         option = '-s' 
-    toolpath = pjoin(BASEPATH, 'specificfuse', whichfuse, 'fs')
-    mntcmd = toolpath + ' ' + img + ' ' + option + ' ' + mntpoint
+    toolpath = pjoin(BASEPATH, 'specificfs', whichfuse, 'fs')
+    mntcmd = f"{toolpath} {img} {option} {mntpoint}"
     print(mntcmd)
-    subprocess.Popen(mntcmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
+    proc = subprocess.Popen(mntcmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
+    proc.wait()
     
 def chown(mntpoint):
     try:
-        subprocess.check_call(['sudo', 'chown', '%s.%s' %
+        subprocess.check_call(['chown', '%s.%s' %
                               (os.getuid(), os.getgid()), '-R', mntpoint])
     except:
         pass
@@ -44,13 +45,11 @@ def kumount(mntpoint):
 
 
 def userumount(mntpoint):
-    subprocess.check_call(['sudo', 'fusermount', '-u', mntpoint])
+    subprocess.check_call(['fusermount', '-u', mntpoint])
     assert not os.path.ismount(mntpoint) 
 
 
 def cc_mounter(is_kernelfs, fs_type, target, input, output):
-
-
 	if is_kernelfs == '1':
 
 		'''
@@ -71,8 +70,8 @@ def cc_mounter(is_kernelfs, fs_type, target, input, output):
 		kmount(fs_type, target, mnt_target)
 		kmount(fs_type, target, mnt_adjoint)
 		# kmount(fs_type, target, mnt_seq)
-		for mnt_dir in [mnt_target, mnt_adjoint, mnt_seq]:
-			chown(mnt_dir)
+		# for mnt_dir in [mnt_target, mnt_adjoint, mnt_seq]:
+		# 	chown(mnt_dir)
 
 		ccparser.cc_parser(mnt_target, input)
 		kumount(mnt_target)
@@ -89,6 +88,7 @@ def cc_mounter(is_kernelfs, fs_type, target, input, output):
 			kumount(mnt_dir)
 		# os.rmdir(mnt_dir)
 		return mnt_target
+
 	elif is_kernelfs == '0':
 		mnt_target = tempfile.mkdtemp()
 		mnt_adjoint = tempfile.mkdtemp()
@@ -99,8 +99,8 @@ def cc_mounter(is_kernelfs, fs_type, target, input, output):
 		# usermount(specific fs path, mntdir,options)
 		usermount(fs_type, target, mnt_target)
 		# usermount(fs_type, target, mnt_adjoint)
-		for mnt_dir in [mnt_target, mnt_adjoint, mnt_seq]:
-			chown(mnt_dir)
+		# for mnt_dir in [mnt_target, mnt_adjoint, mnt_seq]:
+		# 	chown(mnt_dir)
 		print("right here******************start parser\n")
 		ccparser.cc_parser(mnt_target, input)
 		userumount(mnt_target)

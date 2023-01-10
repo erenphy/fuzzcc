@@ -11,6 +11,9 @@
     - [ ] 更新README.md
 - [ ] 从 ccserver.py 的 main 函数开始逐步重构
     - [x] ~~ccgenerator.py 中 JoinableQueue 改用 Queue~~
+    - [ ] 队列 Queue 是线程安全的，可以不用显式添加 mutex
+- [ ] 处理异常情况：
+    - [ ] `fusermount: failed to unmount /tmp/tmphd49aoxt: Device or resource busy`
 
 ## 原理
 
@@ -47,7 +50,7 @@ usage: ccserver.py [-h] [-k IS_KERNEL_FS] [-t FS_TYPE]
 - 程序入口: ccserver.py
 
 ```shell
-$ python3 ccserver.py -k 0 -t specific
+$ python3 ccserver.py -k 0 -t xv6fs
 ```
 
 ---

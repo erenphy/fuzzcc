@@ -3,15 +3,17 @@ import os
 from subprocess import Popen, PIPE
 from cctools import file_md5_hash
 from globalVar import MKFS_PATH
+import logging
 
 
 def init_fs(fs01_filename, fs02_filename, init_files):
     proc_1 = Popen(f"{MKFS_PATH} {fs01_filename} {init_files}", shell=True, stdout=PIPE, stderr=PIPE)
     proc_2 = Popen(f"{MKFS_PATH} {fs02_filename} {init_files}", shell=True, stdout=PIPE, stderr=PIPE)
-    proc_1.communicate()
+    _, stderr = proc_1.communicate()
     proc_2.communicate()
     if proc_1.returncode != 0 or proc_2.returncode != 0:
         print("Error: mkfs failed")
+        logging.error(f"mkfs Error, stderr: {stderr}")
         exit(1)
     if file_md5_hash(fs01_filename) != file_md5_hash(fs02_filename):
         print("Error: fs01 and fs02 are not the same")

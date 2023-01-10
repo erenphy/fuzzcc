@@ -108,10 +108,7 @@ class Generator(threading.Thread):
 				cur_queue.append(syscall_kv)
 			init_size = init_size - 1
 			logging.debug(f"cur_queue: {cur_queue}")
-			MUTEX.acquire()
 			SEED_QUEUE.put(cur_queue)
-			MUTEX.release()
-			# join()是函数出口吗？不是，是在这里阻塞（我保留了之前的代码，应该把它删了）
 
 # drop this method
 def ccget_seed():

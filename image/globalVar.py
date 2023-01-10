@@ -1,5 +1,5 @@
 """
-	global variables defination
+    global variables defination
 """
 
 from multiprocessing import JoinableQueue
@@ -9,13 +9,11 @@ import enum, os
 from enum import IntEnum
 import logging
 from time import strftime
-from threading import Lock, Semaphore
 
 # mkfs 所在路径
-MKFS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "specificfs", "xv6fs", "mkfs")
+MKFS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../specificfs", "xv6fs", "mkfs")
 
-# 日志记录相关，不知道为什么basicConfig它给我报错，就注释掉了
-
+# 日志记录相关
 log_file = os.path.join("logfiles", strftime('%m%d_%H:%M:%S') + '-syscalls.log' ) 
 logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.DEBUG, format='%(asctime)s [%(levelname)s]: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -23,6 +21,12 @@ logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.DEBUG, fo
 OUT_OUT_TIME = 4
 # 参数长度
 ARG_LENGTH = 3
+
+# 文件系统镜像文件所在目录
+IMAGES_DIR = "images"
+
+# 全局计数器
+GLOBAL_COUNT = 1
 
 COUNT = 0
 
@@ -35,9 +39,6 @@ TESTCASE_QUEUE = Queue()
 SEED_QUEUE = Queue() 
 # 每条调用序列
 SYSCALLS = []
-# 互斥锁
-MUTEX = Lock()
-SEMAPHORE = Semaphore(1)
 
 # log_file_handle = open(log_file, 'w')
 # log_file_handle.write('STARTING LOGGing\n')
@@ -45,16 +46,16 @@ SEMAPHORE = Semaphore(1)
 # 用16进制
 @enum.unique
 class ops(IntEnum):
-	CREAT = 0
-	WRITE = 1
-	APPEND = 2
-	READ = 3
-	HARDLN = 4
-	SOFTLN = 5
-	REMOVE = 6
-	MKDIR= 7
-	SYNC = 8
-	RENAME = 9
+    CREAT = 0
+    WRITE = 1
+    APPEND = 2
+    READ = 3
+    HARDLN = 4
+    SOFTLN = 5
+    REMOVE = 6
+    MKDIR= 7
+    SYNC = 8
+    RENAME = 9
 # 常量 一次赋值
 OPS_LENGTH = len(list(ops))
 DIR_FULL_SIZE = 15

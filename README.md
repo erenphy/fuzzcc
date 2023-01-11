@@ -2,18 +2,16 @@
 
 ## TODO
 
+- [ ] 添加崩溃一致性校验
 - [ ] 重构代码
     - [ ] 文件结构重整
-    - [ ] 代码分模块重构
+    - [x] ~~代码分模块重构~~
     - [x] ~~改用多线程处理种子的生成与消费~~
         - python 多线程: https://docs.python.org/zh-cn/3/library/threading.html
         - [互斥锁解决 Python 中多线程共享全局变量的问题](https://zhuanlan.zhihu.com/p/259969195)
-    - [ ] 更新README.md
-- [ ] 从 ccserver.py 的 main 函数开始逐步重构
-    - [x] ~~ccgenerator.py 中 JoinableQueue 改用 Queue~~
-    - [ ] 队列 Queue 是线程安全的，可以不用显式添加 mutex
-- [ ] 处理异常情况：
-    - [ ] `fusermount: failed to unmount /tmp/tmphd49aoxt: Device or resource busy`
+    - [x] ~~更新README.md~~
+- [ ] Bug 修复
+    - `ccmounter.py` 中的 `userumount` 方法存在执行后不生效的情况
 
 ## 原理
 
@@ -24,21 +22,24 @@
 ## 目录结构
 
 ```
-.
-├── ccgenerator.py    ----> 种子生成
+image
+├── ccfuzzer.py      -- Fuzzer
+├── ccgenerator.py   -- 生成种子
 ├── ccinit.py
-├── ccmounter.py
-├── ccmutator.py      ----> 种子变异
+├── ccmounter.py     -- 文件系统挂载
+├── ccmutator.py     -- 种子变异
 ├── ccparser.py
-├── ccserver.py       ----> 主程序
+├── ccserver.py      -- 主程序
 ├── ccsyscalls.py
 ├── cctools.py
+├── clean.sh
 ├── crash-parse.py
 ├── fusetest.py
-├── fuzzcc.py
-├── globalVar.py
+├── globalVar.py     -- 全局变量
+├── images/          -- 文件系统镜像
+├── init.txt         -- 初始化文件
 ├── istat.py
-├── logfiles/         ----> 日志目录
+├── logfiles/        -- 日志
 ```
 
 ## Usage

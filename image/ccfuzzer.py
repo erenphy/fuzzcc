@@ -2,6 +2,7 @@
 import threading
 import copy
 import tempfile
+import time
 from globalVar import *
 import ccparser
 import ccmounter
@@ -33,30 +34,34 @@ class Fuzzer(threading.Thread):
                     # TODO: 怎么移除  --> queue的get操作是取出（直接删掉头部元素并返回，不需要移除
             logging.warning("Fuzz done. Waitting...")
             # 阻塞等待信号
-            self.event.wait()
+            if not self.event.wait(timeout=TIME_OUT):
+                break
             self.event.clear()
 
             # # 在现存的testcase上重新执行
             # if morecmp_signal == 1:
-            #     for cur_seq in TESTCASE_QUEUE:
-            #         cur_result = morerunner(iskfs, fstype, cur_seq)
+            #     while not TESTCASE_QUEUE.empty():
+            #         cur_seq = TESTCASE_QUEUE.get()
+            #         cur_result = morerunner(self.iskfs, self.fstype, cur_seq)
             #         if cur_result == 1:
-            #             #比较的目标和顺序文件系统执行不一致，则不具备strictly consistency,设置信号/flag
-            #             #TODO: 写日志 给出最后结果，可以把下面的输出保存到logfile里？或者程序界面
+            #             # 比较的目标和顺序文件系统执行不一致，则不具备strictly consistency,设置信号/flag
+            #             # TODO: 写日志 给出最后结果，可以把下面的输出保存到logfile里？或者程序界面
             #             strict_signal = 0
             #             print('stopped!relatively consistency\n')
             #     if strict_signal == 0:
             #         print('well done! strictly consistency\n')
             # print("the end+++++++++++++++++++")
-
+        print("[-] Fuzzer work done.")
 
 # runner() input为单个操作序列， output为执行后的镜像
 def runner(is_kernelfs, fs_type, input):
+    global GLOBAL_COUNT
     # 初始化文件系统镜像
     # init_fs(fs01_filename, fs02_filename, init_files)
     init_files = " ".join(["init.txt"])   # 这里初始化的文件要能让脚本找到
     target_img = os.path.join(IMAGES_DIR, f"{GLOBAL_COUNT}.img")
     adjoint_img = os.path.join(IMAGES_DIR, f"{GLOBAL_COUNT}_adjoint.img")
+    GLOBAL_COUNT += 1
     init_fs(target_img, adjoint_img, init_files)
     
     # 使用 ccmounter 挂载生成的文件系统
@@ -96,8 +101,6 @@ def runner(is_kernelfs, fs_type, input):
 
             # TODO:并将input加入seedqueue(这个加入是动态的，所以上边的初始种子和变异设置多线程阻塞，一旦mumator发现种子队列为空，阻塞等待，说不定能发现新种子)
             # 这里多线程里给seedqueue加, 可以直接用put吗?print('stopped!relatively consistency\n'),设置信号/flag
-            # -- 加锁操作
-            # -- 感觉种子可以考虑写文件保存起来
             SEED_QUEUE.put(input)
 
             # TODO 将当前镜像target_img 和 adjoint_img的路径、和 input记录到logfile的一行
@@ -106,8 +109,28 @@ def runner(is_kernelfs, fs_type, input):
 
         else:
             diff_signal = 0
-            #TODO 删除当前的镜像 target_img和adjoint_mnt
-            #TODO 删除生成的随机目录： target_mnt和adjoint_mnt
-            # 关于路径啥的python调用shell命令，我不会写
-            # --> 参考： https://www.myfreax.com/python-delete-files-and-directories/
+            while True:
+                try:
+                    # 删除当前的镜像 target_img 和 adjoint_mnt
+                    if os.path.exists(target_img):
+                        os.remove(target_img)
+                    if os.path.exists(adjoint_img):
+                        os.remove(adjoint_img)
+                    # 删除生成的随机目录： target_mnt和adjoint_mnt
+                    if os.path.exists(target_mnt):
+                        os.rmdir(target_mnt)
+                    if os.path.exists(adjoint_mnt):
+                        os.rmdir(adjoint_mnt)
+                    break
+                except OSError as e:
+                    logging.error("%s - %s. Retrying..." % (e.filename, e.strerror))
+                    ccmounter.userumount(e.filename)
+                    time.sleep(0.5)
+
+
+    return diff_signal
+
+def morerunner(is_kernelfs, fs_type, input):
+    diff_signal = 0
+    # 暂时没找到合适的顺序文件系统，暂不实现
     return diff_signal

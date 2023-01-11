@@ -3,6 +3,7 @@ import random
 from os.path import join as pjoin
 import os
 import copy
+import time
 
 import globalVar
 import ccgenerator
@@ -32,12 +33,16 @@ class Mutator(threading.Thread):
                 # if cur_seed == None: break
                 print("mutator: printing cur_seed")
                 print(cur_seed)
-                TESTCASE_QUEUE.put(copy.deepcopy(cur_seed))
+                # TESTCASE_QUEUE.put(copy.deepcopy(cur_seed))
                 ccmutate_syscalls(TESTCASE_QUEUE, cur_seed)
                 self.fuzzer_event.set()
             # 阻塞等待信号
-            self.event.wait()
+            if not self.event.wait(timeout=TIME_OUT):
+                if TESTCASE_QUEUE.empty():
+                    break
+                time.sleep(1)
             self.event.clear()
+        print("[-] Mutator work done.")
 
 
 def ccmutate_wtname(file):

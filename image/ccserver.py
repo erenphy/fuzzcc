@@ -9,11 +9,6 @@ from ccmutator import Mutator
 from ccfuzzer import Fuzzer
 
 
-def morerunner(is_kernelfs, fs_type, input):
-    diff_signal = 0
-    # 暂时没找到合适的顺序文件系统，暂不实现
-    return diff_signal
-
 def arg_parse():
     # 参数解析
     parser = argparse.ArgumentParser()
@@ -55,9 +50,15 @@ if __name__ == '__main__':
 
     print("[+] Waitting for generator work done...")
     gene_pro.join()
-    print("[+] Generator work done.")
+    logging.warning("[+] Generator work done.")
     muta_pro.event.set()
     
     fuzzer = Fuzzer("fuzzer", iskfs, fstype, fuzzer_event)
     fuzzer.start()
     
+    muta_pro.join()
+    logging.warning("[+] Mutator work done.")
+    fuzzer.join()
+    logging.warning("[+] Fuzzer work done.")
+
+    print("[+] All work done.")

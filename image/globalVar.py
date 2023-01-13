@@ -18,7 +18,7 @@ log_file = os.path.join("logfiles", strftime('%m%d_%H:%M:%S') + '-syscalls.log' 
 logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.DEBUG, format='%(asctime)s [%(levelname)s]: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 # 暂时设置超时时间为 4
-TIME_OUT = 4
+TIME_OUT = 10
 # 参数长度
 ARG_LENGTH = 3
 

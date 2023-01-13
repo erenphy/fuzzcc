@@ -83,52 +83,49 @@ def runner(is_kernelfs, fs_type, input):
         # usermount(specific fs path, img, mntdir,options(可选))
         ccmounter.usermount(fs_type, target_img, target_mnt)
         ccmounter.usermount(fs_type, adjoint_img, adjoint_mnt)
-        # for mnt_dir in [target_mnt, adjoint_mnt, seq_mnt]:
-        #     ccmounter.chown(mnt_dir)
         # parser 解释执行input
-        print("right here******************start parser\n")
+        print("[+] Starting parser......\n")
+
         ccparser.cc_parser(target_mnt, input)
-        ccmounter.userumount(target_mnt)
-        ccmounter.usermount(fs_type, target_img, target_mnt)
         ccparser.cc_parser(adjoint_mnt, input)
+
         ccmounter.userumount(target_mnt)
+        ccmounter.userumount(adjoint_mnt)
 
         # 执行后调用hash校验对比两个img文件hash, 如果不一致则保存现场数据
         if file_md5_hash(target_img) != file_md5_hash(adjoint_img):
             print("Error: target_img and adjoint_img are not the same\n")
             # 设置发现不一致的信号
             diff_signal = 1
-
-            # TODO:并将input加入seedqueue(这个加入是动态的，所以上边的初始种子和变异设置多线程阻塞，一旦mumator发现种子队列为空，阻塞等待，说不定能发现新种子)
-            # 这里多线程里给seedqueue加, 可以直接用put吗?print('stopped!relatively consistency\n'),设置信号/flag
             SEED_QUEUE.put(input)
 
-            # TODO 将当前镜像target_img 和 adjoint_img的路径、和 input记录到logfile的一行
-            # 日志记录看一下 logging 的使用: https://docs.python.org/zh-cn/3/howto/logging.html
+            # 将当前镜像target_img 和 adjoint_img的路径、和 input记录到logfile的一行
             logging.info(f"logging path -- target_img: {target_img}; adjoint_img: {adjoint_img}; input: {input}")
 
         else:
             diff_signal = 0
-            while True:
-                try:
-                    # 删除当前的镜像 target_img 和 adjoint_mnt
-                    if os.path.exists(target_img):
-                        os.remove(target_img)
-                    if os.path.exists(adjoint_img):
-                        os.remove(adjoint_img)
-                    # 删除生成的随机目录： target_mnt和adjoint_mnt
-                    if os.path.exists(target_mnt):
-                        os.rmdir(target_mnt)
-                    if os.path.exists(adjoint_mnt):
-                        os.rmdir(adjoint_mnt)
-                    break
-                except OSError as e:
-                    logging.error("%s - %s. Retrying..." % (e.filename, e.strerror))
-                    ccmounter.userumount(e.filename)
-                    time.sleep(0.5)
-
+            umount_and_remove_path(target_img, target_mnt, adjoint_img, adjoint_mnt)
 
     return diff_signal
+
+def umount_and_remove_path(target_img, target_mnt, adjoint_img, adjoint_mnt):
+    while True:
+        try:
+            # 删除当前的镜像 target_img 和 adjoint_mnt
+            if os.path.exists(target_img):
+                os.remove(target_img)
+            if os.path.exists(adjoint_img):
+                os.remove(adjoint_img)
+            # 删除生成的随机目录： target_mnt和adjoint_mnt
+            if os.path.exists(target_mnt):
+                os.rmdir(target_mnt)
+            if os.path.exists(adjoint_mnt):
+                os.rmdir(adjoint_mnt)
+            break
+        except OSError as e:
+            logging.error("%s - %s. Retrying..." % (e.filename, e.strerror))
+            ccmounter.userumount(e.filename)
+            time.sleep(0.5)
 
 def morerunner(is_kernelfs, fs_type, input):
     diff_signal = 0

@@ -48,9 +48,8 @@ def kumount(mntpoint):
 def userumount(mntpoint):
     ret_code = 1
     while ret_code != 0:
-        ret_code = subprocess.call(['fusermount', '-u', mntpoint])
-        time.sleep(0.5)
-    assert not os.path.ismount(mntpoint) 
+        time.sleep(1)
+        ret_code = subprocess.call(['fusermount', '-zu', mntpoint])
 
 
 def cc_mounter(is_kernelfs, fs_type, target, input, output):

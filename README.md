@@ -10,8 +10,8 @@
         - python 多线程: https://docs.python.org/zh-cn/3/library/threading.html
         - [互斥锁解决 Python 中多线程共享全局变量的问题](https://zhuanlan.zhihu.com/p/259969195)
     - [x] ~~更新README.md~~
-- [ ] Bug 修复
-    - `ccmounter.py` 中的 `userumount` 方法存在执行后不生效的情况
+- [x] Bug 修复
+    - ~~`ccmounter.py` 中的 `userumount` 方法存在执行后不生效的情况~~
 
 ## 原理
 

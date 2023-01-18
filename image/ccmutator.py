@@ -46,7 +46,7 @@ class Mutator(threading.Thread):
 
 
 def ccmutate_wtname(file):
-    print("ccmutate_wtname() is running\n")
+    # print("ccmutate_wtname() is running\n")
     pre_path = file.rsplit("/", 1)[0]
     post_file = file.rsplit("/", 1)[1]
     # print(post_file)
@@ -58,12 +58,12 @@ def ccmutate_wtname(file):
 
 # totally 没有知识的变异
 def ccmutate_wtpara(para_num):
-    print("ccmutate_wtpara() is running\n")
+    # print("ccmutate_wtpara() is running\n")
     ccnot = para_num ^ 0b1111
     return ccnot
 
 def ccmutate_dir(dirpath):
-    print("ccmutate_dir(dirpath) is running\n")
+    # print("ccmutate_dir(dirpath) is running\n")
     new_dir = ccgenerator.ccgene_dir()
     if new_dir == dirpath:
         # 运气不至于这么差，两次gene结果都一样
@@ -90,6 +90,8 @@ def ccmutate_syscalls(testcaseq, syscall_list):
             if not syscall[1][0].rsplit("/", 1)[1] in globalVar.MY_FILE_LIST:
                 syscall[1][1] = ccmutate_dir(syscall[1][1])
             else: syscall[1][1] = ccmutate_wtname(syscall[1][1])
+        elif syscall[0] == 'fsync':
+            syscall[1] = ccmutate_wtname(syscall[1])
         else: pass
         # print('\nsyscall_list is ')
         cur_syscalls = copy.deepcopy(syscall_list)

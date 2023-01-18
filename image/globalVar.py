@@ -15,7 +15,7 @@ MKFS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../specifi
 
 # 日志记录相关
 log_file = os.path.join("logfiles", strftime('%m%d_%H:%M:%S') + '-syscalls.log' ) 
-logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.DEBUG, format='%(asctime)s [%(levelname)s]: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s [%(levelname)s]: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 # 暂时设置超时时间为 4
 TIME_OUT = 10
@@ -33,7 +33,8 @@ COUNT = 0
 # 测试用例队列
 TESTCASE_QUEUE = Queue()
 # TESTCASE_QUEUE = JoinableQueue()
-
+TESTCASE_QUEUE.put([['creat','./A/foo'],['sync'],['creat','A/bar'],['fsync','A']])
+TESTCASE_QUEUE.put([['hardlink',['foo','bar']],['sync'],['remove','bar'],['creat','bar'],['fsync','bar']])
 # 种子队列
 # SEED_QUEUE = JoinableQueue() 
 SEED_QUEUE = Queue() 
@@ -44,6 +45,7 @@ SYSCALLS = []
 # log_file_handle.write('STARTING LOGGing\n')
 
 # 用16进制
+# 新增加了fsync和unlink
 @enum.unique
 class ops(IntEnum):
     CREAT = 0
@@ -56,16 +58,20 @@ class ops(IntEnum):
     MKDIR= 7
     SYNC = 8
     RENAME = 9
+    FSYNC = 10
 # 常量 一次赋值
 OPS_LENGTH = len(list(ops))
 DIR_FULL_SIZE = 15
-INIT_TIME_MAX = 5
-INIT_TIME_MIN = 3
+INIT_TIME_MAX = 20
+INIT_TIME_MIN = 10
 SMALL_DATA = 'abcdefgijklmnopqrst1234567890asdfghjkl;zxcvbnmqwertyuopifromLXH'
 BIG_DATA = 'a very very huge data size, waiting for appending, perheps from file'
 # 作为系统调用的参数：file/dir
-MY_FILE_LIST = ['foo', 'bar', 'baz']
+# MY_FILE_LIST = ['foo', 'bar', 'baz']
+MY_FILE_LIST = ['foo', 'bar']
 MY_DIR_LIST = ['./', './A']
+
+MY_RECORD_LIST = Queue()
 
 # 作为系统调用的参数：other
 MY_MNT_POINT = '/mnt/ext3' 

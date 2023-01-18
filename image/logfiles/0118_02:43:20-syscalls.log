@@ -1,0 +1,26 @@
+2023-01-18 02:43:20 [WARNING]: ccserver start running...
+2023-01-18 02:43:20 [DEBUG]: cur_queue: [['write', './B/D/E/bar', 4], ['sync'], ['mkdir', './A/D']]
+2023-01-18 02:43:20 [DEBUG]: cur_queue: [['creat', './A/D/foo'], ['read', './A/baz'], ['sync']]
+2023-01-18 02:43:20 [DEBUG]: cur_queue: [['append', './baz', 12]]
+2023-01-18 02:43:20 [DEBUG]: cur_queue: [['append', './A/D/bar', 7], ['mkdir', './A'], ['read', './A/D/bar']]
+2023-01-18 02:43:20 [DEBUG]: cur_queue: [['remove', './A/bar'], ['rename', ['./B/D/E/foo', './B/D/E/foo']]]
+2023-01-18 02:43:20 [DEBUG]: cur_queue: [['softlink', ['./foo', './A/D/bar']]]
+2023-01-18 02:43:20 [DEBUG]: cur_queue: [['append', './A/C/foo', 13], ['remove', './A/C/baz']]
+2023-01-18 02:43:20 [DEBUG]: cur_queue: [['softlink', ['./A/C/foo', './A/D/bar']], ['mkdir', './B'], ['remove', './B/D/E/foo']]
+2023-01-18 02:43:20 [DEBUG]: cur_queue: [['hardlink', ['./B/C/E/baz', './B/D/E/bar']]]
+2023-01-18 02:43:20 [DEBUG]: cur_queue: [['mkdir', './B/D/E'], ['hardlink', ['./B/bar', './bar']], ['sync']]
+2023-01-18 02:43:21 [DEBUG]: cur_queue: [['hardlink', ['./bar', './A/C/F/baz']], ['mkdir', './B/C'], ['rename', ['./B/D/E/bar', './A/foo']]]
+2023-01-18 02:43:21 [DEBUG]: cur_queue: [['read', './A/C/F/baz']]
+2023-01-18 02:43:21 [DEBUG]: cur_queue: [['creat', './B/C/E/baz']]
+2023-01-18 02:43:21 [DEBUG]: cur_queue: [['remove', './foo'], ['softlink', ['./A/C/F/baz', './bar']]]
+2023-01-18 02:43:21 [DEBUG]: cur_queue: [['write', './B/C/foo', 0], ['hardlink', ['./A/C/baz', './A/baz']], ['read', './A/D/foo']]
+2023-01-18 02:43:21 [DEBUG]: cur_queue: [['remove', './A/D/baz']]
+2023-01-18 02:43:21 [DEBUG]: cur_queue: [['creat', './B/baz']]
+2023-01-18 02:43:21 [DEBUG]: cur_queue: [['softlink', ['./A/D', './B/D/baz']], ['write', './B/D/F/bar', 3]]
+2023-01-18 02:43:21 [DEBUG]: cur_queue: [['append', './B/D/E/bar', 7], ['mkdir', './A/D/E'], ['sync']]
+2023-01-18 02:43:21 [WARNING]: [+] Generator work done.
+2023-01-18 02:44:06 [INFO]: logging path -- target_img: images/17.img; adjoint_img: images/17_adjoint.img; input: [['softlink', ['./A/C/foo', './A/D/foo']], ['mkdir', './A'], ['remove', './B/D/E/foo']]
+2023-01-18 02:45:14 [WARNING]: Fuzz done. Waitting...
+2023-01-18 02:45:14 [WARNING]: Fuzz done. Waitting...
+2023-01-18 02:45:21 [WARNING]: [+] Mutator work done.
+2023-01-18 02:45:24 [WARNING]: [+] Fuzzer work done.

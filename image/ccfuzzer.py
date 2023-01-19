@@ -85,12 +85,21 @@ def runner(is_kernelfs, fs_type, input):
         ccmounter.usermount(fs_type, adjoint_img, adjoint_mnt)
         # parser 解释执行input
         print("[+] Starting parser......\n")
-
+        # lxh:目标文件系统上执行完立即解挂
         ccparser.cc_parser(target_mnt, input)
-        ccparser.cc_parser(adjoint_mnt, input)
-
         ccmounter.userumount(target_mnt)
+        
+        #lxh:伴随文件系统上 停1秒再解挂
+        ccparser.cc_parser(adjoint_mnt, input)
+        # ccmounter.userumount(target_mnt)
+        time.sleep(1)
         ccmounter.userumount(adjoint_mnt)
+        
+        # lxh: 重新挂载 允许目标文件系统进行崩溃恢复
+        # need to fix :执行下面两个挂载的话，会报错device busy。很奇怪明明上边已经解除挂载了
+        ccmounter.usermount(fs_type, target_img, target_mnt)
+        ccmounter.usermount(fs_type, adjoint_img, adjoint_mnt)
+        
 
         # 执行后调用hash校验对比两个img文件hash, 如果不一致则保存现场数据
         if file_md5_hash(target_img) != file_md5_hash(adjoint_img):
@@ -105,7 +114,7 @@ def runner(is_kernelfs, fs_type, input):
         else:
             diff_signal = 0
             umount_and_remove_path(target_img, target_mnt, adjoint_img, adjoint_mnt)
-
+        
     return diff_signal
 
 def umount_and_remove_path(target_img, target_mnt, adjoint_img, adjoint_mnt):

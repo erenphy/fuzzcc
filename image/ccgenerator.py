@@ -166,7 +166,8 @@ def ccgene_dir():
         return random.choice(MY_DIR_LIST)
     _x = Xeger(limit = 2)
 #	out = _x.xeger(r'(\./[AB](/[CD](/[EF])?)?)')
-    out = _x.xeger(r'(\./[AB](/[CD])?)')
+#    out = _x.xeger(r'(\./[AB](/[CD])?)')
+    out = _x.xeger(r'(\./[AB](/C)?)')
     if not out in MY_DIR_LIST:
         MY_DIR_LIST.append(out)
     return out

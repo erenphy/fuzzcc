@@ -97,8 +97,8 @@ def runner(is_kernelfs, fs_type, input):
         
         # lxh: 重新挂载 允许目标文件系统进行崩溃恢复
         # need to fix :执行下面两个挂载的话，会报错device busy。很奇怪明明上边已经解除挂载了
-        ccmounter.usermount(fs_type, target_img, target_mnt)
-        ccmounter.usermount(fs_type, adjoint_img, adjoint_mnt)
+        # ccmounter.usermount(fs_type, target_img, target_mnt)
+        # ccmounter.usermount(fs_type, adjoint_img, adjoint_mnt)
         
 
         # 执行后调用hash校验对比两个img文件hash, 如果不一致则保存现场数据

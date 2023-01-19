@@ -51,7 +51,8 @@ def ccmutate_wtname(file):
     post_file = file.rsplit("/", 1)[1]
     # print(post_file)
     bro_list = copy.deepcopy(globalVar.MY_FILE_LIST)
-    bro_list.remove(post_file)
+    if post_file in bro_list:
+        bro_list.remove(post_file)
     bro = random.choice(bro_list)
     bro = pjoin(pre_path, bro)
     return bro

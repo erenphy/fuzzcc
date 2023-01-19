@@ -60,5 +60,8 @@ if __name__ == '__main__':
     logging.warning("[+] Mutator work done.")
     fuzzer.join()
     logging.warning("[+] Fuzzer work done.")
+    num = GLOBAL_COUNT
+    logging.debug(f"Totally testing number = : {num}")
 
     print("[+] All work done.")
+    

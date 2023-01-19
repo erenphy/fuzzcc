@@ -16,7 +16,7 @@ def ccfsync(mntpoint, filename):
     filepath = pjoin(mntpoint, filename)
     if not os.path.exists(filepath):
         print('path not exist\n')
-        pass
+        return
     fd = os.open(filepath, os.O_CREAT | os.O_APPEND |os.O_RDWR)
     os.fsync(fd)
 def cccreat(mntpoint, filename):
@@ -155,11 +155,11 @@ def ccsflink(mntpoint, src, dst):
             ccmkdir(mntpoint, src)
             print("mkdir " + src)
     if os.path.islink(srcpath) and not os.path.exists(dstpath):
-        print("srcpath is a symlink\n")
+        # print("srcpath is a symlink\n")
         sflink = os.readlink(srcpath)
         os.symlink(sflink, dstpath)
     elif os.path.isfile(srcpath) and not os.path.exists(dstpath):
-        print("srcpath is a file\n")
+        # print("srcpath is a file\n")
         os.symlink(srcpath, dstpath)
     log = 'ln -s ' + src + ' ' + dst + '\n'
     globalVar.log_file_handle.write(log)

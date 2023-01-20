@@ -6,7 +6,7 @@ import random
 
 import globalVar
 
-# 全局变量 globalVar.log_file_handle
+# 全局变量 globalVar.log_file_handle----0119这个变量被删除了
 # 各种文件操作功能函数的实现
 # imported by fusetest.py
 
@@ -15,10 +15,23 @@ import globalVar
 def ccfsync(mntpoint, filename):
     filepath = pjoin(mntpoint, filename)
     if not os.path.exists(filepath):
-        print('path not exist\n')
+        print('fsync error: path not exist\n')
         return
     fd = os.open(filepath, os.O_CREAT | os.O_APPEND |os.O_RDWR)
     os.fsync(fd)
+def ccunlink(mntpoint, filename):
+    abspath = pjoin(mntpoint, filename)
+    if os.path.isfile(abspath):
+        print("unlinking file " + filename)
+        os.unlink(abspath)
+        # log = 'remove file ' + file + '\n'
+        # globalVar.log_file_handle.write(log)
+def ccrmdir(mntpoint, dir):
+    abspath = pjoin(mntpoint, dir)
+    if os.path.isdir(abspath):
+        print("rming dir " + dir)
+        os.rmdir(abspath)
+
 def cccreat(mntpoint, filename):
     # print("Test CREAT\n")
     filepath = pjoin(mntpoint, filename)
@@ -28,8 +41,8 @@ def cccreat(mntpoint, filename):
             ccmkdir(mntpoint, pre_dir)
         fd = open(filepath, 'x')
         fd.close()
-        log = 'creat ' + filename + '\n'
-        globalVar.log_file_handle.write(log)	
+        # log = 'creat ' + filename + '\n'
+        # globalVar.log_file_handle.write(log)	
 
 def ccappend(mntpoint, filename, Buf = False, Lseek = False, Fdatasync = False, Fsync = False):
     # print("Test append\n")
@@ -40,9 +53,9 @@ def ccappend(mntpoint, filename, Buf = False, Lseek = False, Fdatasync = False, 
         how = random.randint(0, 2)
         print(str(fd))
         os.lseek(fd, pos, how)
-        print('\n new fd = ' + str(fd))
-        log = 'lseek ' + filename + ' ' + str(pos) + ' ' + str(how) + '\n'
-        globalVar.log_file_handle.write(log)
+        # print('\n new fd = ' + str(fd))
+        # log = 'lseek ' + filename + ' ' + str(pos) + ' ' + str(how) + '\n'
+        # globalVar.log_file_handle.write(log)
     if Buf: 
         buf = globalVar.SMALL_DATA
     else: buf = globalVar.BIG_DATA
@@ -50,15 +63,15 @@ def ccappend(mntpoint, filename, Buf = False, Lseek = False, Fdatasync = False, 
     os.write(fd, buf)
     if Fdatasync:
         os.fdatasync(fd)
-        log = 'fdatasync ' + filename + '\n'
-        globalVar.log_file_handle.write(log) 
+        # log = 'fdatasync ' + filename + '\n'
+        # globalVar.log_file_handle.write(log) 
     if Fsync:
         os.fsync(fd)
-        log = 'fsync ' + filename + '\n'
-        globalVar.log_file_handle.write(log)
+        # log = 'fsync ' + filename + '\n'
+        # globalVar.log_file_handle.write(log)
     os.close(fd)
-    log = 'append ' + filename + '\n'
-    globalVar.log_file_handle.write(log)
+    # log = 'append ' + filename + '\n'
+    # globalVar.log_file_handle.write(log)
 
 def ccwrite(mntpoint, filename, Buf = False, Lseek = False, Fdatasync = False, Fsync = False):
     # print("Testing WRITE\n")
@@ -72,23 +85,23 @@ def ccwrite(mntpoint, filename, Buf = False, Lseek = False, Fdatasync = False, F
         pos = random.randint(0, 2)
         how = random.randint(0, 2)
         os.lseek(fd, pos, how)
-        log = 'lseek ' + filename + ' ' + pos + ' ' + how + '\n'
-        globalVar.log_file_handle.write(log)
+        # log = 'lseek ' + filename + ' ' + pos + ' ' + how + '\n'
+        # globalVar.log_file_handle.write(log)
     if Buf: 
         buf = globalVar.SMALL_DATA
     else: buf = globalVar.BIG_DATA
     os.write(fd, buf)
     if Fdatasync:
         os.fdatasync(fd)
-        log = 'fdatasync ' + filename + '\n'
-        globalVar.log_file_handle.write(log) 
+        # log = 'fdatasync ' + filename + '\n'
+        # globalVar.log_file_handle.write(log) 
     if Fsync:
         os.fsync(fd)
-        log = 'fsync ' + filename + '\n'
-        globalVar.log_file_handle.write(log) 
+        # log = 'fsync ' + filename + '\n'
+        # globalVar.log_file_handle.write(log) 
     os.close(fd)
-    log = 'write ' + filename + '\n'
-    globalVar.log_file_handle.write(log)
+    # log = 'write ' + filename + '\n'
+    # globalVar.log_file_handle.write(log)
 
 # return buffer
 def ccread(mntpoint, filename):
@@ -106,8 +119,8 @@ def ccread(mntpoint, filename):
         return ' '
     buf = os.read(fd, file_size)
     os.close(fd)
-    log = 'cat ' + file + '\n'
-    globalVar.log_file_handle.write(log)
+    # log = 'cat ' + file + '\n'
+    # globalVar.log_file_handle.write(log)
     return buf
 
 def ccrename(mntpoint, old, new):
@@ -119,8 +132,8 @@ def ccrename(mntpoint, old, new):
             os.rename(oldpath, newpath)
         except:
             pass
-    log = 'rename ' + old + ' ' + new + '\n'
-    globalVar.log_file_handle.write(log)
+    # log = 'rename ' + old + ' ' + new + '\n'
+    # globalVar.log_file_handle.write(log)
 
 # 可执行条件：源路径存在且不是目录，目标路径不存在  
 # 硬链接的源操作数不能是目录  
@@ -135,8 +148,8 @@ def cchdlink(mntpoint, src, dst):
         os.link(srcpath, dstpath)
     except:
         pass
-    log = 'ln ' + src + ' ' + dst + '\n'
-    globalVar.log_file_handle.write(log)
+    # log = 'ln ' + src + ' ' + dst + '\n'
+    # globalVar.log_file_handle.write(log)
 
 # if src is symlink, deal with it	
 # 源路径不存在的话，需要创建
@@ -161,8 +174,8 @@ def ccsflink(mntpoint, src, dst):
     elif os.path.isfile(srcpath) and not os.path.exists(dstpath):
         # print("srcpath is a file\n")
         os.symlink(srcpath, dstpath)
-    log = 'ln -s ' + src + ' ' + dst + '\n'
-    globalVar.log_file_handle.write(log)
+    # log = 'ln -s ' + src + ' ' + dst + '\n'
+    # globalVar.log_file_handle.write(log)
 
 # if dir already exists, pass
 def ccmkdir(mntpoint, dir):
@@ -170,8 +183,8 @@ def ccmkdir(mntpoint, dir):
     dirpath = pjoin(mntpoint, dir)
     if not os.path.exists(dirpath):
         os.makedirs(dirpath)
-        log = 'mkdir ' + dir + '\n'
-        globalVar.log_file_handle.write(log)
+        # log = 'mkdir ' + dir + '\n'
+        # globalVar.log_file_handle.write(log)
 
 # 删除文件或 目录（递归删除目录）
 def ccremove(mntpoint, file):
@@ -191,14 +204,14 @@ def ccremove(mntpoint, file):
 def cclseek(fd, pos = 0, how = 0):
     # print("Test LSEEK\n")
     os.lseek(fd, pos, how)
-    log = 'lseek ' + fd + '\n'
-    globalVar.log_file_handle.write(log)
+    # log = 'lseek ' + fd + '\n'
+    # globalVar.log_file_handle.write(log)
     return fd
 
 def ccsync():
     os.sync()
-    log = 'sync' + '\n'
-    globalVar.log_file_handle.write(log)
+    # log = 'sync' + '\n'
+    # globalVar.log_file_handle.write(log)
 
 if __name__ == '__main__':
     # cchdlink(globalVar.MY_MNT_POINT,'file5', 'file5_hdln')
@@ -208,6 +221,6 @@ if __name__ == '__main__':
         print("hhhhhhaaaaa")
     else: print("wwwwwwwwwwwwwww")
     '''
-    print('testing fsync\n')
-    ccfsync('./', 'testfsync')
-    print("ccsyscalls.py is calling\n")
+    # print('testing fsync\n')
+    # ccfsync('./', 'testfsync')
+    # print("ccsyscalls.py is calling\n")

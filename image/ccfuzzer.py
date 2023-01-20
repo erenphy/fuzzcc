@@ -57,12 +57,13 @@ class Fuzzer(threading.Thread):
 def runner(is_kernelfs, fs_type, input):
     global GLOBAL_COUNT
     # 初始化文件系统镜像
-    # init_fs(fs01_filename, fs02_filename, init_files)
+    # 用法: init_fs(fs01_filename, fs02_filename, init_files)
     init_files = " ".join(["init.txt"])   # 这里初始化的文件要能让脚本找到
     target_img = os.path.join(IMAGES_DIR, f"{GLOBAL_COUNT}.img")
     adjoint_img = os.path.join(IMAGES_DIR, f"{GLOBAL_COUNT}_adjoint.img")
     GLOBAL_COUNT += 1
-    init_fs(target_img, adjoint_img, init_files)
+    # lxh0120:增加参数fstype
+    init_fs(fs_type, target_img, adjoint_img, init_files)
     
     # 使用 ccmounter 挂载生成的文件系统
     if is_kernelfs == '1':
@@ -87,12 +88,13 @@ def runner(is_kernelfs, fs_type, input):
         print("[+] Starting parser......\n")
         # lxh:目标文件系统上执行完立即解挂
         ccparser.cc_parser(target_mnt, input)
+        ccparser.cc_parser(adjoint_mnt, input)
         ccmounter.userumount(target_mnt)
         
         #lxh:伴随文件系统上 停1秒再解挂
-        ccparser.cc_parser(adjoint_mnt, input)
+        # ccparser.cc_parser(adjoint_mnt, input)
         # ccmounter.userumount(target_mnt)
-        time.sleep(1)
+        # time.sleep(1)
         ccmounter.userumount(adjoint_mnt)
         
         # lxh: 重新挂载 允许目标文件系统进行崩溃恢复

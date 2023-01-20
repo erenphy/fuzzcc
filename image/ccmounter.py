@@ -27,7 +27,12 @@ def usermount(whichfuse, img, mntpoint,option='-f'):
     if whichfuse == 'xv6fs':
         option = '-s' 
     toolpath = pjoin(BASEPATH, 'specificfs', whichfuse, 'fs')
-    mntcmd = f"{toolpath} {img} {option} {mntpoint}"
+    if whichfuse =='xv6fs':
+        # xv6fs usage: ./fs img -s /mntpnt
+        mntcmd = f"{toolpath} {img} {option} {mntpoint}"
+    elif whichfuse =='ffs':
+        # ffs usage: ./fs -f /mntpnt img
+        mntcmd = f"{toolpath} {option} {mntpoint} {img}"
     print(mntcmd)
     proc = subprocess.Popen(mntcmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
     proc.wait()

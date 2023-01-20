@@ -42,6 +42,14 @@ def cc_parser(mnt_point, syscalls):
             try: 
                 ccsyscalls.ccremove(mnt_point, cur_syscall[1])
             except: pass
+        elif cur_syscall[0] == 'unlink':
+            try: 
+                ccsyscalls.ccunlink(mnt_point, cur_syscall[1])
+            except: pass
+        elif cur_syscall[0] == 'rmdir':
+            try: 
+                ccsyscalls.ccrmdir(mnt_point, cur_syscall[1])
+            except: pass
         elif cur_syscall[0] == 'rename':
             try:
                 ccsyscalls.ccrename(mnt_point, cur_syscall[1][0], cur_syscall[1][1])

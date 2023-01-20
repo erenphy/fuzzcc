@@ -11,7 +11,8 @@ import logging
 from time import strftime
 
 # mkfs 所在路径
-MKFS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../specificfs", "xv6fs", "mkfs")
+# MKFS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../specificfs", "xv6fs", "mkfs")
+MKFS_PATH_PREFIX = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../specificfs")
 
 # 日志记录相关
 log_file = os.path.join("logfiles", strftime('%m%d_%H:%M:%S') + '-syscalls.log' ) 
@@ -93,7 +94,7 @@ SMALL_DATA = 'abcdefgijklmnopqrst1234567890asdfghjkl;zxcvbnmqwertyuopifromLXH'
 BIG_DATA = 'a very very huge data size, waiting for appending, perheps from file'
 # 作为系统调用的参数：file/dir
 # MY_FILE_LIST = ['./foo', './bar', './baz']
-MY_FILE_LIST = ['./foo', './bar']
+MY_FILE_LIST = ['foo', 'bar','baz']
 MY_DIR_LIST = ['./', './A']
 
 # MY_RECORD_LIST = Queue()

@@ -31,7 +31,7 @@ class Mutator(threading.Thread):
             while not SEED_QUEUE.empty():
                 cur_seed = SEED_QUEUE.get()
                 # if cur_seed == None: break
-                print("mutator: printing cur_seed")
+                print("mutator: printing cur_seed----")
                 print(cur_seed)
                 # TESTCASE_QUEUE.put(copy.deepcopy(cur_seed))
                 ccmutate_syscalls(TESTCASE_QUEUE, cur_seed)
@@ -86,6 +86,10 @@ def ccmutate_syscalls(testcaseq, syscall_list):
             if syscall[1].rsplit("/", 1)[1] in globalVar.MY_FILE_LIST:
                 syscall[1] = ccmutate_wtname(syscall[1])
             else: syscall[1] = ccmutate_dir(syscall[1])
+        elif syscall[0] == 'unlink':
+            syscall[1] = ccmutate_wtname(syscall[1])
+        elif syscall[0] == 'rmdir':
+            syscall[1] = ccmutate_dir(syscall[1])
         elif syscall[0] == 'rename':
             # 判断操作数是目录还是文件
             if not syscall[1][0].rsplit("/", 1)[1] in globalVar.MY_FILE_LIST:
@@ -93,7 +97,11 @@ def ccmutate_syscalls(testcaseq, syscall_list):
             else: syscall[1][1] = ccmutate_wtname(syscall[1][1])
         elif syscall[0] == 'fsync':
             syscall[1] = ccmutate_wtname(syscall[1])
-        else: pass
+        elif syscall[0] == 'sync':
+            pass
+        else: 
+            print(".......mutator........not support..............\n")
+            pass
         # print('\nsyscall_list is ')
         cur_syscalls = copy.deepcopy(syscall_list)
         testcaseq.put(cur_syscalls)

@@ -36,11 +36,13 @@ class Generator(threading.Thread):
             cur_length = randint(1,self.length)
             # 0118:追踪过程中产生的新目录/文件，指导下一个文件操作的参数
             cur_exist_file = []
+            cur_exist_dir = []
             # print("\ncur_length = " + str(cur_length))
             while cur_length:
-                rdm = randint(0, OPS_LENGTH - 1)
+                rdm = randint(0, 7)
+                # rdm = randint(0, OPS_LENGTH-1)
                 print("\nrandom ops = " + str(rdm))
-                # syscall_kv = []
+                syscall_kv = []
                 if rdm == ops.CREAT:
                     print("\ncreating files")
                     cur_op = 'creat'
@@ -71,6 +73,7 @@ class Generator(threading.Thread):
                 elif rdm == ops.MKDIR:
                     cur_op = 'mkdir'
                     cur_name = ccgene_dir()
+                    cur_exist_dir.append(cur_name)
                     syscall_kv = [cur_op, cur_name]
                     # ccsyscalls.ccmkdir(globalVar.MY_MNT_POINT, cur_name)
                 elif rdm == ops.READ:
@@ -85,11 +88,31 @@ class Generator(threading.Thread):
                     # ccsyscalls.ccread(globalVar.MY_MNT_POINT, cur_name)
                 elif rdm == ops.REMOVE:
                     cur_op = 'remove'
-                    # 相当于unlink file 或 rmdir, 
-                    file_or_dir = [ccgene_file, ccgene_dir]
-                    # Q:返回值是空字符串怎么办
-                    # A:还没想到
-                    cur_name = random.choice(file_or_dir)()
+                    # 相当于unlink file, 
+                    if cur_exist_file:
+                        cur_name = random.choice(cur_exist_file)
+                    else:
+                        cur_name = ccgene_file()
+                        cur_exist_file.append(cur_name)
+                    syscall_kv = [cur_op, cur_name]
+                    # ccsyscalls.ccremove(globalVar.MY_MNT_POINT, cur_name)
+                elif rdm == ops.UNLINK:
+                    # lxh:删除文件
+                    cur_op = 'unlink'
+                    if cur_exist_file:
+                        cur_name = random.choice(cur_exist_file)
+                    else:
+                        cur_name = ccgene_file()
+                        cur_exist_file.append(cur_name)
+                    syscall_kv = [cur_op, cur_name]
+                    # ccsyscalls.ccunlink(globalVar.MY_MNT_POINT, cur_name)
+                elif rdm == ops.RMDIR:
+                    # lxh:删除文件
+                    cur_op = 'rmdir'
+                    if cur_exist_dir:
+                        cur_name = random.choice(cur_exist_dir)
+                    else:
+                        cur_name = ccgene_dir()
                     syscall_kv = [cur_op, cur_name]
                     # ccsyscalls.ccremove(globalVar.MY_MNT_POINT, cur_name)
                 elif rdm == ops.RENAME:

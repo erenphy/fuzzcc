@@ -21,7 +21,7 @@ def kmount(fstype, device, mntpoint, options=[]):
         ['sudo', 'mount', '-o', ','.join(['loop'] + options), '-t', fstype, device, mntpoint])
 
 
-def usermount(whichfuse, img, mntpoint,option='-f'):
+def usermount(whichfuse, img, mntpoint,option='-s'):
     #print(['sudo', whichfuse, img, '-f', mntpoint])
     # print(basepath)
     if whichfuse == 'xv6fs':
@@ -33,7 +33,7 @@ def usermount(whichfuse, img, mntpoint,option='-f'):
     elif whichfuse =='ffs':
         # ffs usage: ./fs -f /mntpnt img
         mntcmd = f"{toolpath} {option} {mntpoint} {img}"
-    print(mntcmd)
+    # print(mntcmd)
     proc = subprocess.Popen(mntcmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
     proc.wait()
     
@@ -55,7 +55,6 @@ def userumount(mntpoint):
     while ret_code != 0:
         time.sleep(1)
         ret_code = subprocess.call(['fusermount', '-zu', mntpoint])
-
 
 def cc_mounter(is_kernelfs, fs_type, target, input, output):
     if is_kernelfs == '1':

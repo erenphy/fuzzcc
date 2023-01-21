@@ -3,6 +3,7 @@ from os.path import join as pjoin
 import time
 import math
 import random
+import subprocess
 
 import globalVar
 
@@ -14,33 +15,42 @@ import globalVar
 # globalVar.log_file_handle = 0 定义在globalVal.py文件中
 def ccfsync(mntpoint, filename):
     filepath = pjoin(mntpoint, filename)
-    if not os.path.exists(filepath):
-        print('fsync error: path not exist\n')
-        return
+    # if not os.path.exists(filepath):
+    #     print('fsync error: path not exist\n')
+    #    return
     fd = os.open(filepath, os.O_CREAT | os.O_APPEND |os.O_RDWR)
     os.fsync(fd)
 def ccunlink(mntpoint, filename):
     abspath = pjoin(mntpoint, filename)
     if os.path.isfile(abspath):
-        print("unlinking file " + filename)
+        # print("unlinking file " + filename)
         os.unlink(abspath)
         # log = 'remove file ' + file + '\n'
         # globalVar.log_file_handle.write(log)
 def ccrmdir(mntpoint, dir):
     abspath = pjoin(mntpoint, dir)
     if os.path.isdir(abspath):
-        print("rming dir " + dir)
+        # print("rming dir " + dir)
         os.rmdir(abspath)
 
 def cccreat(mntpoint, filename):
     # print("Test CREAT\n")
     filepath = pjoin(mntpoint, filename)
+    # if not os.path.exists(filepath):
+    if not filename in globalVar.MY_FILE_LIST:
+        pre_dir = filename.rsplit("/", 1)[0]
+        ccmkdir(mntpoint, pre_dir)
     if not os.path.exists(filepath):
-        if not filename in globalVar.MY_FILE_LIST:
-            pre_dir = filename.rsplit("/", 1)[0]
-            ccmkdir(mntpoint, pre_dir)
-        fd = open(filepath, 'x')
-        fd.close()
+        try:
+            print('start creat' + filepath)
+            fd = open(filepath, 'x')
+            print('creat done')
+            fd.close()
+        except:
+            print('creat--error --------------------missing creat')
+            pass
+    else: 
+        print("already existed, not need creat")
         # log = 'creat ' + filename + '\n'
         # globalVar.log_file_handle.write(log)	
 
@@ -76,9 +86,9 @@ def ccappend(mntpoint, filename, Buf = False, Lseek = False, Fdatasync = False, 
 def ccwrite(mntpoint, filename, Buf = False, Lseek = False, Fdatasync = False, Fsync = False):
     # print("Testing WRITE\n")
     filepath = pjoin(mntpoint, filename)
-    openmod = os.O_RDWR
-    if not os.path.exists(filepath):	
-        openmod = openmod | os.O_CREAT
+    openmod = os.O_RDWR |os.O_CREAT
+    # if not os.path.exists(filepath):	
+    #    openmod = openmod | os.O_CREAT
     fd = os.open(filepath, openmod)
     os.write(fd, buf)
     if Lseek:
@@ -124,13 +134,37 @@ def ccread(mntpoint, filename):
     return buf
 
 def ccrename(mntpoint, old, new):
-    # print("Test RENAME\n")
+    print("Test RENAME\n")
     oldpath = pjoin(mntpoint, old)
     newpath = pjoin(mntpoint, new)
+    # print('rename decide: oldpath = ' + oldpath)
+    is_file = oldpath.rsplit("/", 1)[1]
+    print('rename decide: ' + is_file)
+    if is_file in globalVar.MY_FILE_LIST:
+        print('To rename file, first creat file')
+        cccreat(mntpoint, is_file)
+    else:
+        # 不是文件，是目录
+        print('To rename dir, first mkdir')
+        ccmkdir(mntpoint, is_file)
+    # os.rename(oldpath, newpath)
     if os.path.exists(oldpath):
         try:
-            os.rename(oldpath, newpath)
+            print('before rename ----------')
+            # os.rename(oldpath, newpath)
+            file1 = oldpath.rsplit("/",1)[1]
+            file2 = newpath.rsplit("/",1)[1]
+            op0 = 'cd ' + mntpoint + ' &&'
+            op = 'rename'
+            op1 = '\'s/' + file1 + '/' + file2 + '/gm\''
+            op2 = '*'
+            mntcmd = f"{op0} {op} {op1} {op2}"
+            print(mntcmd)
+            proc = subprocess.Popen(mntcmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
+            proc.wait()
+            print('rename done!!')
         except:
+            print('error --------------missing------rename-------------- ')
             pass
     # log = 'rename ' + old + ' ' + new + '\n'
     # globalVar.log_file_handle.write(log)
@@ -142,12 +176,18 @@ def cchdlink(mntpoint, src, dst):
     srcpath = pjoin(mntpoint, src)
     dstpath = pjoin(mntpoint, dst)
     if not os.path.exists(srcpath):
+        # print('hardlink decide: first creat+++++++++++++++' + srcpath)
         cccreat(mntpoint, src)
-    # if not os.path.exists(dstpath) and os.path.isfile(srcpath):
-    try: 
-        os.link(srcpath, dstpath)
-    except:
-        pass
+    if not os.path.exists(srcpath):
+        print("-----------before hardlink creat failed!!!")
+    if not os.path.exists(dstpath) and os.path.isfile(srcpath):
+        try: 
+            # print('do hardlink')
+            os.link(srcpath, dstpath)
+            # print('hardlink done')
+        except:
+            # print('hardlink error --------------missing -------')
+            pass
     # log = 'ln ' + src + ' ' + dst + '\n'
     # globalVar.log_file_handle.write(log)
 
@@ -166,7 +206,7 @@ def ccsflink(mntpoint, src, dst):
             cccreat(mntpoint, src)
         else:
             ccmkdir(mntpoint, src)
-            print("mkdir " + src)
+            # print("mkdir " + src)
     if os.path.islink(srcpath) and not os.path.exists(dstpath):
         # print("srcpath is a symlink\n")
         sflink = os.readlink(srcpath)
@@ -193,13 +233,13 @@ def ccremove(mntpoint, file):
     if os.path.isfile(abspath):
         # print("removing file " + file)
         os.remove(abspath)
-        log = 'remove file ' + file + '\n'
-        globalVar.log_file_handle.write(log)
+        # log = 'remove file ' + file + '\n'
+        # globalVar.log_file_handle.write(log)
     elif os.path.isdir(abspath):
         print("\n" + abspath)
         os.removedirs(abspath)
-        log = 'rmdir ' + file + '\n'
-        globalVar.log_file_handle.write(log)
+        # log = 'rmdir ' + file + '\n'
+        # globalVar.log_file_handle.write(log)
 
 def cclseek(fd, pos = 0, how = 0):
     # print("Test LSEEK\n")
@@ -221,6 +261,7 @@ if __name__ == '__main__':
         print("hhhhhhaaaaa")
     else: print("wwwwwwwwwwwwwww")
     '''
+    # ccrename('./amnt', './A/bar', './ddd')
     # print('testing fsync\n')
     # ccfsync('./', 'testfsync')
     # print("ccsyscalls.py is calling\n")

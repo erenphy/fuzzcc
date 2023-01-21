@@ -23,6 +23,7 @@ def ccparser_convert_wtpara(para_num):
     
 def cc_parser(mnt_point, syscalls):
     print("func: parser() is called\n")
+    print(syscalls)
     for cur_syscall in syscalls:
         if cur_syscall[0] == 'creat':
             try:

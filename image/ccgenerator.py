@@ -39,12 +39,12 @@ class Generator(threading.Thread):
             cur_exist_dir = []
             # print("\ncur_length = " + str(cur_length))
             while cur_length:
-                rdm = randint(0, 7)
-                # rdm = randint(0, OPS_LENGTH-1)
-                print("\nrandom ops = " + str(rdm))
+                # rdm = randint(0, 7)
+                rdm = randint(0, OPS_LENGTH-1)
+                # print("\nrandom ops = " + str(rdm))
                 syscall_kv = []
                 if rdm == ops.CREAT:
-                    print("\ncreating files")
+                    # print("\ncreating files")
                     cur_op = 'creat'
                     cur_name = ccgene_file()
                     cur_exist_file.append(cur_name)
@@ -167,8 +167,10 @@ class Generator(threading.Thread):
                     # logging.debug(f"FSYNCing---cur_exist_file: {cur_exist_file}")
                     # syscall_kv = [cur_op, cur_name]
                 else: pass
-                cur_length = cur_length - 1
-                cur_queue.append(syscall_kv)
+                # cur_length = cur_length - 1
+                if syscall_kv:
+                    cur_queue.append(syscall_kv)
+                    cur_length = cur_length - 1
                 # if syscall_kv:
                 #    cur_length = cur_length - 1
                 #    cur_queue.append(syscall_kv)

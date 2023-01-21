@@ -34,11 +34,11 @@ COUNT = 0
 # 测试用例队列
 TESTCASE_QUEUE = Queue()
 # TESTCASE_QUEUE = JoinableQueue()
-# TESTCASE_QUEUE.put([['creat','./A/foo'],['sync'],['creat','./A/bar'],['fsync','./A']])
-'''
+
+TESTCASE_QUEUE.put([['creat','./A/foo'],['sync'],['creat','./A/bar'],['fsync','./A']])
 TESTCASE_QUEUE.put([['hardlink',['./foo','./bar']],['sync'],['remove','./bar'],['creat','./bar'],['fsync','./bar']])
 TESTCASE_QUEUE.put([['write',['./foo','9']],['sync'],['fsync','./foo']])
-TESTCASE_QUEUE.put([['creat',['./A/foo']],['sync'],['creat','./A/bar'],['fsync','./A']])
+TESTCASE_QUEUE.put([['creat','./A/foo'],['sync'],['creat','./A/bar'],['fsync','./A']])
 TESTCASE_QUEUE.put([['hardlink',['./foo','./bar']],['sync'],['remove','./bar'],['fsync','./foo']])
 TESTCASE_QUEUE.put([['creat','./A/foo'],['sync'],['rename', ['./A','./B']],['mkdir','./A'],['fsync','./A']])
 TESTCASE_QUEUE.put([['rename',['./foo','./bar']],['creat','./foo'],['fsync','./bar']])
@@ -56,8 +56,6 @@ TESTCASE_QUEUE.put([['rename',['./A/foo','./foo']],['creat','./bar'],['fsync','.
 TESTCASE_QUEUE.put([['hardlink',['./A/foo','./B/foo']],['creat','./B/bar'],['sync'],['remove','./B/foo'],['rename',['./B/bar','C/bar']],['fsync','./A/foo']])
 # generic 343
 TESTCASE_QUEUE.put([['hardlink',['./A/foo','./A/bar']],['rename',['./B/baz','./A/baz'],['fsync', './A/foo']]])
-'''
-
 
 # 种子队列
 # SEED_QUEUE = JoinableQueue() 
@@ -91,8 +89,8 @@ OPS_LENGTH = len(list(ops))
 DIR_FULL_SIZE = 15
 
 # 可修改，确定初始生成种子池的大小
-INIT_TIME_MAX = 8
-INIT_TIME_MIN = 6
+INIT_TIME_MAX = 16
+INIT_TIME_MIN = 10
 
 SMALL_DATA = 'abcdefgijklmnopqrst1234567890asdfghjkl;zxcvbnmqwertyuopifromLXH'
 BIG_DATA = 'a very very huge data size, waiting for appending, perheps from file'

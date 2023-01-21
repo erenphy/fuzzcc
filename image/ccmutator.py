@@ -4,7 +4,7 @@ from os.path import join as pjoin
 import os
 import copy
 import time
-
+from random import randint
 import globalVar
 import ccgenerator
 import ccsyscalls
@@ -60,7 +60,7 @@ def ccmutate_wtname(file):
 # totally 没有知识的变异
 def ccmutate_wtpara(para_num):
     # print("ccmutate_wtpara() is running\n")
-    ccnot = para_num ^ 0b1111
+    ccnot = para_num ^ 0b1101
     return ccnot
 
 def ccmutate_dir(dirpath):
@@ -71,6 +71,49 @@ def ccmutate_dir(dirpath):
         new_dir = ccgenerator.ccgene_dir()
     return new_dir
 
+# 例子：syscall_list  = [['hardlink',['./foo','./bar']],['sync'],['remove','./bar'],['creat','./bar'],['fsync','./bar']])
+# 把变异后的每一个追加到testcaseq中
+def ccmutate_syscalls(testcaseq, syscall_list):
+    syscall_len = len(syscall_list)
+    # 变异1：随机变换操作序列顺序
+    rdmtime = randint(0, syscall_len - 1)
+    while rdmtime:
+        random.shuffle(syscall_list)
+        cur_syscalls = copy.deepcopy(syscall_list)
+        testcaseq.put(cur_syscalls)
+        rdmtime = rdmtime - 1
+    # 变异2：随机加入检查点
+    rdmidx = randint(0, syscall_len - 1)
+    filename = ccgenerator.ccgene_file()
+    fsyncpnt = ['fsync', filename]
+    syncpnt = ['sync']
+    ckpnt = random.choice([fsyncpnt,syncpnt])
+    syscall_list.insert(rdmidx, ckpnt)
+    cur_syscalls = copy.deepcopy(syscall_list)
+    testcaseq.put(cur_syscalls)
+    # 变异3：变异参数
+    for syscall in syscall_list:
+        if syscall[0] == 'write' or syscall[0] == 'append':
+            syscall[1] = ccmutate_wtname(syscall[1])
+            syscall[2] = ccmutate_wtpara(syscall[2])
+        else:
+            # 只给write和append变异参数
+            pass
+    cur_syscalls = copy.deepcopy(syscall_list)
+    testcaseq.put(cur_syscalls)
+
+if __name__ == '__main__':
+    print("ccmutator.py is running\n")
+    testcaseq = Queue()
+    syscall = [['hardlink',['./foo','./bar']],['sync'],['remove','./bar'],['creat','./bar'],['fsync','./bar']]
+    ccmutate_syscalls(testcaseq, syscall)
+    print('finish mutating')
+    while not testcaseq.empty():
+        print(testcaseq.get())
+    # ccgenerator.cc_generator(6)
+    
+
+'''
 def ccmutate_syscalls(testcaseq, syscall_list):
     for syscall in syscall_list:
         if syscall[0] == 'write' or syscall[0] == 'append':
@@ -105,28 +148,4 @@ def ccmutate_syscalls(testcaseq, syscall_list):
         # print('\nsyscall_list is ')
         cur_syscalls = copy.deepcopy(syscall_list)
         testcaseq.put(cur_syscalls)
-
-# Q: 谁来调用我们的mutator(),谁来负责循环持续进行
-# A:
-''' 
-def cc_mutator(seedq, testcaseq):
-    print("ccmutator() is called\n")
-    # 取出一条操作序列
-    cur_seed = seedq.get()
-    testcaseq.put(copy.deepcopy(cur_seed))
-    ccmutate_syscalls(testcaseq, cur_seed)
-'''
-if __name__ == '__main__':
-    print("ccmutator.py is running\n")
-    
-    ccgenerator.cc_generator(6)
-    '''
-    print("seeds_queue is ")
-    print(globalVar.SEED_QUEUE.queue)
-    print("\n")
-    cc_mutator()
-    print(globalVar.TESTCASE_QUEUE.queue)
-    '''
-    # ccmutate_wtpara(9)
-    # ccsilbling_path('A/E/foo')
-    # ccmutate_syscalls([['write', 'file',[0,1,1,2]]])
+        '''

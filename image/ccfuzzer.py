@@ -15,14 +15,16 @@ class Fuzzer(threading.Thread):
         self.iskfs = iskfs
         self.fstype = fstype
         self.event = event
+        self.done = threading.Event()
 
     def run(self):
         print(f"[+] {self.name} working...")
         global SEED_QUEUE
         global TESTCASE_QUEUE
+        global TABLEINFO
         while True:
             # 一次性把种子队列里头的种子都取出来，然后阻塞等待信号
-            while not TESTCASE_QUEUE.empty():
+            while not TESTCASE_QUEUE.empty() and not self.done.is_set():
                 cur_seq = TESTCASE_QUEUE.get()
                 # print('current seq')
                 # print(cur_seq)
@@ -34,6 +36,8 @@ class Fuzzer(threading.Thread):
                 # else: 
                     # 没有发现不一致，把cur_seq从testcasequeue中移除就好了  
                     # TODO: 怎么移除  --> queue的get操作是取出（直接删掉头部元素并返回，不需要移除
+            if self.done.is_set():
+                break
             logging.warning("Fuzz done. Waitting...")
             # 阻塞等待信号
             if not self.event.wait(timeout=TIME_OUT):
@@ -53,15 +57,20 @@ class Fuzzer(threading.Thread):
             #     if strict_signal == 0:
             #         print('well done! strictly consistency\n')
             # print("the end+++++++++++++++++++")
-        print("[-] Fuzzer work done.")
-        print("Crash counts = " + str(GLOBAL_CRASH_COUNT))
-        # print("Seeds generated counts = " + str(GLOBAL_CRASH_COUNT + GLOBAL_SEED_COUNT))
-        print("Testcases counts = " + str(GLOBAL_COUNT))
-        logging.critical(f"Totally Testcases count = : {GLOBAL_COUNT}")
-        logging.critical(f"Totally Crash count = : {GLOBAL_CRASH_COUNT}")
-        # logging.debug(f"Totally Seeds generated count = : {GLOBAL_CRASH_COUNT + GLOBAL_SEED_COUNT}")
-        tableinfo.add_row("Totally Testcases count", str(GLOBAL_COUNT))
-        tableinfo.add_row("Totally Crash count", str(GLOBAL_CRASH_COUNT))
+        logging.warning("[-] Fuzzer work done.")
+        # print("Crash counts = " + str(GLOBAL_CRASH_COUNT))
+        # # print("Seeds generated counts = " + str(GLOBAL_CRASH_COUNT + GLOBAL_SEED_COUNT))
+        # print("Testcases counts = " + str(GLOBAL_COUNT))
+        # logging.critical(f"Totally Testcases count = : {GLOBAL_COUNT}")
+        # logging.critical(f"Totally Crash count = : {GLOBAL_CRASH_COUNT}")
+        # # logging.debug(f"Totally Seeds generated count = : {GLOBAL_CRASH_COUNT + GLOBAL_SEED_COUNT}")
+        # TABLEINFO.add_row("Totally Testcases count", str(GLOBAL_COUNT))
+        # TABLEINFO.add_row("Totally Crash count", str(GLOBAL_CRASH_COUNT))
+
+    def stop(self):
+        self.done.set()
+        self.event.set()
+        raise Exception("[-] Fuzzer stoped.")
 
 # runner() input为单个操作序列， output为执行后的镜像
 def runner(is_kernelfs, fs_type, input):

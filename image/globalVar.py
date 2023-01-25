@@ -29,15 +29,15 @@ table.add_column("Inputs ")
 table.add_column("Target_mnt")
 table.add_column("Adjoint_mnt")
 
-tableinfo = Table(show_header=True, header_style="bold magenta")
-tableinfo.add_column('INFO')
-tableinfo.add_column('Details')
+TABLEINFO = Table(show_header=True, header_style="bold magenta")
+TABLEINFO.add_column('INFO')
+TABLEINFO.add_column('Details')
 
 
 # 暂时设置超时时间为 4
 TIME_OUT = 10
 # 产生序列的最大长度
-ARG_LENGTH = 7
+ARG_LENGTH = 3
 
 # 文件系统镜像文件所在目录
 IMAGES_DIR = "images"
@@ -124,3 +124,8 @@ MY_DIR_LIST = ['./', './A']
 
 # 作为系统调用的参数：other
 MY_MNT_POINT = '/mnt/ext3' 
+
+
+# TUI 
+WORK_STATUS = 'INIT'
+EXIT_FLAG = False

@@ -10,6 +10,7 @@ import ccgenerator
 import threading
 import globalVar
 from globalVar import SEED_QUEUE, TESTCASE_QUEUE, GLOBAL_MUTATION_COUNT, ARG_LENGTH
+import logging
 
 # 用于种子变异
 # 种子池 pop
@@ -20,6 +21,7 @@ class Mutator(threading.Thread):
         super(Mutator, self).__init__(name=thread_name)
         self.event = threading.Event()
         self.fuzzer_event = fuzzer_event
+        self.done = threading.Event()
 
     def run(self):
         print(f"[+] {self.name} working...")
@@ -28,12 +30,14 @@ class Mutator(threading.Thread):
         while True:
             print("[-] mutator: getting SEED_QUEUE")
             # 一次性把种子队列里头的种子都取出来，然后阻塞等待信号
-            while not SEED_QUEUE.empty():
+            while not SEED_QUEUE.empty() and not self.done.is_set():
                 cur_seed = SEED_QUEUE.get()
                 # if cur_seed == None: break
                 # TESTCASE_QUEUE.put(copy.deepcopy(cur_seed))
                 ccmutate_syscalls(TESTCASE_QUEUE, cur_seed)
                 self.fuzzer_event.set()
+            if self.done.is_set():
+                break
             # 阻塞等待信号
             if not self.event.wait(timeout=globalVar.TIME_OUT):
                 if TESTCASE_QUEUE.empty():
@@ -43,7 +47,11 @@ class Mutator(threading.Thread):
         print("[-] Mutator work done.")
         print("Mutation counts = " + str(GLOBAL_MUTATION_COUNT))
         # globalVar.logging.debug(f"Totally Mutation counts = : {GLOBAL_MUTATION_COUNT}")
+        logging.warning("[+] Mutator work done.")
 
+    def stop(self):
+        self.event.set()
+        self.done.set()
 
 def ccmutate_wtname(file):
     # print("ccmutate_wtname() is running\n")

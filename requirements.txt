@@ -1,2 +1,4 @@
 xeger
 xattr
+pytermgui
+rich

@@ -4,14 +4,12 @@
 
 - [ ] 添加崩溃一致性校验
 - [ ] 重构代码
+    - [ ] TUI 改为实时显示
+    - [ ] 将能够导致crash的输入保存到csv文件中
     - [ ] 文件结构重整
-    - [x] ~~代码分模块重构~~
-    - [x] ~~改用多线程处理种子的生成与消费~~
-        - python 多线程: https://docs.python.org/zh-cn/3/library/threading.html
-        - [互斥锁解决 Python 中多线程共享全局变量的问题](https://zhuanlan.zhihu.com/p/259969195)
-    - [x] ~~更新README.md~~
-- [x] Bug 修复
+- [ ] Bug 修复
     - ~~`ccmounter.py` 中的 `userumount` 方法存在执行后不生效的情况~~
+    - `ResourceWarning: unclosed file`
 
 ## 原理
 

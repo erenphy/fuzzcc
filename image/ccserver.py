@@ -7,6 +7,7 @@ from globalVar import ARG_LENGTH
 from ccgenerator import *
 from ccmutator import *
 from ccfuzzer import *
+from cctui import *
 
 
 def arg_parse():
@@ -39,7 +40,7 @@ def main():
     iskfs = args.is_kernel_fs
     # targetimg = args.targetimg
     fstype = args.fs_type
-    tableinfo.add_row("FStype", fstype)
+    TABLEINFO.add_row("FStype", fstype)
     logging.warning("ccserver start running...")
 
     gene_pro = Generator("generator", ARG_LENGTH)
@@ -57,22 +58,14 @@ def main():
     fuzzer = Fuzzer("fuzzer", iskfs, fstype, fuzzer_event)
     fuzzer.start()
     
-    muta_pro.join()
-    logging.warning("[+] Mutator work done.")
-    fuzzer.join()
-    logging.warning("[+] Fuzzer work done.")
-    print("[+] All work done.")
+    # muta_pro.join()
+    # fuzzer.join()
+    start_tui([muta_pro, fuzzer])
 
 
 if __name__ == '__main__':
-    start = time.clock()
     main()
-    time.sleep(2)
-    end = time.clock()
-    print('Fuzzing time: %f seconds '%(end-start))
-    strtime = str(end - start)
-    logging.critical("Totally Fuzzing time = %s", strtime)
-    tableinfo.add_row("Totally Fuzzing time(seconds)", strtime)
-    console.print(table)
-    console.print("------------DONE-----------")
-    console.print(tableinfo)
+    logging.warning("[+] All work done.")
+    # console.print(table)
+    # console.print("------------DONE-----------")
+    # console.print(tableinfo)

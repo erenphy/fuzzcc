@@ -15,7 +15,7 @@ import threading
 # my own module.py
 import ccsyscalls
 import globalVar
-from globalVar import SEED_QUEUE, tableinfo
+from globalVar import SEED_QUEUE, TABLEINFO
 # ccgenerator.py: 生成初始测试用例集合
 # 	main-func: ccgenerator(max_length)
 
@@ -28,11 +28,12 @@ class Generator(threading.Thread):
     def run(self):
         print(f"[+] {self.name} working...")
         global SEED_QUEUE
+        global TABLEINFO
         # 初始测试用例随机数目
         init_size = randint(globalVar.INIT_TIME_MIN, globalVar.INIT_TIME_MAX)
         print("\nInit seedpool size = " + str(init_size))
         logging.critical(f"Totally Seeds generated count = : {init_size}")
-        tableinfo.add_row("Init Seedpool size", str(init_size))
+        TABLEINFO.add_row("Init Seedpool size", str(init_size))
         while init_size:
             # 每条测试用例的长度随机生成
             # print("\ninit seedpool countdown" + str(init_size))

@@ -14,7 +14,8 @@ import threading
 
 # my own module.py
 import ccsyscalls
-from globalVar import *
+import globalVar
+from globalVar import SEED_QUEUE
 # ccgenerator.py: 生成初始测试用例集合
 # 	main-func: ccgenerator(max_length)
 
@@ -28,10 +29,12 @@ class Generator(threading.Thread):
         print(f"[+] {self.name} working...")
         global SEED_QUEUE
         # 初始测试用例随机数目
-        init_size = randint(INIT_TIME_MIN, INIT_TIME_MAX)
+        init_size = randint(globalVar.INIT_TIME_MIN, globalVar.INIT_TIME_MAX)
+        print("\nInit seedpool size = " + str(init_size))
+        logging.debug(f"Totally Seeds generated count = : {init_size}")
         while init_size:
             # 每条测试用例的长度随机生成
-            print("\ninit seedpool countdown" + str(init_size))
+            # print("\ninit seedpool countdown" + str(init_size))
             cur_queue = []
             cur_length = randint(1,self.length)
             # 0118:追踪过程中产生的新目录/文件，指导下一个文件操作的参数
@@ -40,17 +43,17 @@ class Generator(threading.Thread):
             # print("\ncur_length = " + str(cur_length))
             while cur_length:
                 # rdm = randint(0, 7)
-                rdm = randint(0, OPS_LENGTH-1)
-                # print("\nrandom ops = " + str(rdm))
+                rdm = randint(0, globalVar.ARG_LENGTH - 1)
+                # print("\nrandom globalVar.ops.= " + str(rdm))
                 syscall_kv = []
-                if rdm == ops.CREAT:
+                if rdm == globalVar.ops.CREAT:
                     # print("\ncreating files")
                     cur_op = 'creat'
                     cur_name = ccgene_file()
                     cur_exist_file.append(cur_name)
                     syscall_kv = [cur_op, cur_name]
                     # ccsyscalls.cccreat(globalVar.MY_MNT_POINT, cur_para)
-                elif rdm == ops.APPEND:
+                elif rdm == globalVar.ops.APPEND:
                     cur_op = 'append'
                     if cur_exist_file:
                         cur_name = random.choice(cur_exist_file)
@@ -61,7 +64,7 @@ class Generator(threading.Thread):
                     cur_para = ccgene_wt_para()
                     syscall_kv = [cur_op, cur_name, cur_para]
                     # ccsyscalls.ccappend(globalVar.MY_MNT_POINT, cur_name, cur_para)
-                elif rdm == ops.HARDLN:
+                elif rdm == globalVar.ops.HARDLN:
                     cur_op = 'hardlink'
                     cur_name1 = ccgene_file()
                     cur_name2 = ccgene_file()
@@ -70,13 +73,13 @@ class Generator(threading.Thread):
                     cur_exist_file.append(cur_name2)
                     syscall_kv = [cur_op, [cur_name1, cur_name2]]
                     # ccsyscalls.cchdlink(globalVar.MY_MNT_POINT, cur_name)
-                elif rdm == ops.MKDIR:
+                elif rdm == globalVar.ops.MKDIR:
                     cur_op = 'mkdir'
                     cur_name = ccgene_dir()
                     cur_exist_dir.append(cur_name)
                     syscall_kv = [cur_op, cur_name]
                     # ccsyscalls.ccmkdir(globalVar.MY_MNT_POINT, cur_name)
-                elif rdm == ops.READ:
+                elif rdm == globalVar.ops.READ:
                     cur_op = 'read'
                     if cur_exist_file:
                         # 读一些现有的文件
@@ -86,7 +89,7 @@ class Generator(threading.Thread):
                         cur_exist_file.append(cur_name)
                     syscall_kv = [cur_op, cur_name]
                     # ccsyscalls.ccread(globalVar.MY_MNT_POINT, cur_name)
-                elif rdm == ops.REMOVE:
+                elif rdm == globalVar.ops.REMOVE:
                     cur_op = 'remove'
                     # 相当于unlink file, 
                     if cur_exist_file:
@@ -96,7 +99,7 @@ class Generator(threading.Thread):
                         cur_exist_file.append(cur_name)
                     syscall_kv = [cur_op, cur_name]
                     # ccsyscalls.ccremove(globalVar.MY_MNT_POINT, cur_name)
-                elif rdm == ops.UNLINK:
+                elif rdm == globalVar.ops.UNLINK:
                     # lxh:删除文件
                     cur_op = 'unlink'
                     if cur_exist_file:
@@ -106,7 +109,7 @@ class Generator(threading.Thread):
                         cur_exist_file.append(cur_name)
                     syscall_kv = [cur_op, cur_name]
                     # ccsyscalls.ccunlink(globalVar.MY_MNT_POINT, cur_name)
-                elif rdm == ops.RMDIR:
+                elif rdm == globalVar.ops.RMDIR:
                     # lxh:删除文件
                     cur_op = 'rmdir'
                     if cur_exist_dir:
@@ -115,7 +118,7 @@ class Generator(threading.Thread):
                         cur_name = ccgene_dir()
                     syscall_kv = [cur_op, cur_name]
                     # ccsyscalls.ccremove(globalVar.MY_MNT_POINT, cur_name)
-                elif rdm == ops.RENAME:
+                elif rdm == globalVar.ops.RENAME:
                     cur_op = 'rename'
                     # haaa, 这里的方法好原始
                     cur_name1 = ccgene_file()
@@ -127,7 +130,7 @@ class Generator(threading.Thread):
                         cur_exist_file.append(cur_name2)
                     syscall_kv = [cur_op, cur_name]
                     # ccsyscalls.ccrename(globalVar.MY_MNT_POINT, cur_name1, cur_name2)
-                elif rdm == ops.SOFTLN:
+                elif rdm == globalVar.ops.SOFTLN:
                     cur_op = 'softlink'
                     if cur_exist_file:
                         cur_name1 = random.choice(cur_exist_file)
@@ -143,10 +146,10 @@ class Generator(threading.Thread):
                     cur_name = [cur_name4, cur_name2]
                     syscall_kv = [cur_op, cur_name]
                     # ccsyscalls.ccsflink(globalVar.MY_MNT_POINT,cur_name)
-                elif rdm == ops.SYNC:
+                elif rdm == globalVar.ops.SYNC:
                     cur_op = 'sync'
                     syscall_kv = [cur_op]
-                elif rdm == ops.WRITE:
+                elif rdm == globalVar.ops.WRITE:
                     cur_op = 'write'
                     if cur_exist_file:
                         cur_name = random.choice(cur_exist_file)
@@ -157,7 +160,7 @@ class Generator(threading.Thread):
                     cur_para = ccgene_wt_para()
                     syscall_kv = [cur_op, cur_name, cur_para]
                     # ccsyscalls.ccwrite(globalVar.MY_MNT_POINT, cur_name, cur_para)
-                elif rdm == ops.FSYNC:
+                elif rdm == globalVar.ops.FSYNC:
                     cur_op = 'fsync'
                     if cur_exist_file:
                         cur_name = random.choice(cur_exist_file)
@@ -179,7 +182,7 @@ class Generator(threading.Thread):
             init_size = init_size - 1
             # logging.debug(f"cur_exist_file: {cur_exist_file}")
             logging.debug(f"cur_queue: {cur_queue}")
-            SEED_QUEUE.put(cur_queue)
+            globalVar.SEED_QUEUE.put(cur_queue)
 
 # drop this method
 def ccget_seed():
@@ -189,23 +192,23 @@ def ccget_seed():
 
 # return: a random-dirpath
 def ccgene_dir():
-    if len(MY_DIR_LIST) >= DIR_FULL_SIZE:
-        return random.choice(MY_DIR_LIST)
+    if len(globalVar.MY_DIR_LIST) >= globalVar.DIR_FULL_SIZE:
+        return random.choice(globalVar.MY_DIR_LIST)
     _x = Xeger(limit = 2)
 #	out = _x.xeger(r'(\./[AB](/[CD](/[EF])?)?)')
 #    out = _x.xeger(r'(\./[AB](/[CD])?)')
     out = _x.xeger(r'(\./[AB](/C)?)')
     
-    if not out in MY_DIR_LIST:
-        MY_DIR_LIST.append(out)
+    if not out in globalVar.MY_DIR_LIST:
+        globalVar.MY_DIR_LIST.append(out)
     return out
 
 # return: a random-filename with full path
 def ccgene_file():
-    out = random.choice(MY_FILE_LIST)
+    out = random.choice(globalVar.MY_FILE_LIST)
     # 增加genarate目录的频率
     ccgene_dir()
-    pre_dir = random.choice(MY_DIR_LIST)
+    pre_dir = random.choice(globalVar.MY_DIR_LIST)
     return pjoin(pre_dir, out)
 
 def ccgene_wt_para():

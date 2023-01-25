@@ -57,9 +57,11 @@ class Fuzzer(threading.Thread):
         print("Crash counts = " + str(GLOBAL_CRASH_COUNT))
         # print("Seeds generated counts = " + str(GLOBAL_CRASH_COUNT + GLOBAL_SEED_COUNT))
         print("Testcases counts = " + str(GLOBAL_COUNT))
-        logging.debug(f"Totally Testcases count = : {GLOBAL_COUNT}")
-        logging.debug(f"Totally Crash count = : {GLOBAL_CRASH_COUNT}")
+        logging.critical(f"Totally Testcases count = : {GLOBAL_COUNT}")
+        logging.critical(f"Totally Crash count = : {GLOBAL_CRASH_COUNT}")
         # logging.debug(f"Totally Seeds generated count = : {GLOBAL_CRASH_COUNT + GLOBAL_SEED_COUNT}")
+        tableinfo.add_row("Totally Testcases count", str(GLOBAL_COUNT))
+        tableinfo.add_row("Totally Crash count", str(GLOBAL_CRASH_COUNT))
 
 # runner() input为单个操作序列， output为执行后的镜像
 def runner(is_kernelfs, fs_type, input):
@@ -122,6 +124,7 @@ def runner(is_kernelfs, fs_type, input):
             
             # 将当前镜像target_img 和 adjoint_img的路径、和 input记录到logfile的一行
             logging.info(f"logging path -- target_img: {target_img}; adjoint_img: {adjoint_img}; input: {input}")
+            table.add_row(str(GLOBAL_COUNT), f"{input}", target_mnt, adjoint_mnt)
             # 还得删除，不然大实验跑不动
             umount_and_remove_path(target_img, target_mnt, adjoint_img, adjoint_mnt)
 

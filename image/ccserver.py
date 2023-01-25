@@ -3,10 +3,10 @@ import argparse, sys
 import logging
 import threading
 import time
-from globalVar import *
-from ccgenerator import Generator
-from ccmutator import Mutator
-from ccfuzzer import Fuzzer
+from globalVar import ARG_LENGTH
+from ccgenerator import *
+from ccmutator import *
+from ccfuzzer import *
 
 
 def arg_parse():
@@ -26,10 +26,11 @@ def arg_parse():
     
     return args
 
-if __name__ == '__main__':
+
     # 是否需要进一步判断目标文件系统与顺序文件系统执行的信号
     # 若目标和伴随的比较没有发现不一致，则信号设为1,需要继续比较
     # 否则，为0，不需要继续比较
+def main():
     morecmp_signal = 1
     # 假设一开始具备strict-consistency
     strict_signal = 1
@@ -60,8 +61,13 @@ if __name__ == '__main__':
     logging.warning("[+] Mutator work done.")
     fuzzer.join()
     logging.warning("[+] Fuzzer work done.")
-    num = GLOBAL_COUNT
-    logging.debug(f"Totally testing number = : {num}")
-
     print("[+] All work done.")
-    
+
+if __name__ == '__main__':
+    start = time.clock()
+    main()
+    time.sleep(2)
+    end = time.clock()
+    print('Fuzzing time: %f seconds '%(end-start))
+    strtime = str(end - start)
+    logging.warning("Totally Fuzzing time = %s", strtime)

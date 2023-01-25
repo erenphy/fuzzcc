@@ -33,7 +33,7 @@ def usermount(whichfuse, img, mntpoint,option='-s'):
     elif whichfuse =='ffs':
         # ffs usage: ./fs -f /mntpnt img
         mntcmd = f"{toolpath} {option} {mntpoint} {img}"
-    print(mntcmd)
+    # print(mntcmd)
     proc = subprocess.Popen(mntcmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
     proc.wait()
     

@@ -3,12 +3,50 @@ import argparse, sys
 import logging
 import threading
 import time
+import csv
 from globalVar import ARG_LENGTH
+import globalVar
 from ccgenerator import *
 from ccmutator import *
 from ccfuzzer import *
 from cctui import *
 
+def init():
+    globalVar._init()
+    # Init Testcase Queue
+    global TESTCASE_QUEUE
+    TESTCASE_QUEUE.put([['creat','./A/foo'],['sync'],['creat','./A/bar'],['fsync','./A']])
+    TESTCASE_QUEUE.put([['hardlink',['./foo','./bar']],['sync'],['remove','./bar'],['creat','./bar'],['fsync','./bar']])
+    TESTCASE_QUEUE.put([['write',['./foo','9']],['sync'],['fsync','./foo']])
+    TESTCASE_QUEUE.put([['creat','./A/foo'],['sync'],['creat','./A/bar'],['fsync','./A']])
+    TESTCASE_QUEUE.put([['hardlink',['./foo','./bar']],['sync'],['remove','./bar'],['fsync','./foo']])
+    TESTCASE_QUEUE.put([['creat','./A/foo'],['sync'],['rename', ['./A','./B']],['mkdir','./A'],['fsync','./A']])
+    TESTCASE_QUEUE.put([['rename',['./foo','./bar']],['creat','./foo'],['fsync','./bar']])
+    TESTCASE_QUEUE.put([['creat','./foo'],['fsync','./foo'],['write',['./foo','9']],['fsync','./foo']])
+    TESTCASE_QUEUE.put([['hardlink',['./foo','./A/foo']], ['hardlink',['./bar','./A/bar']],['fsync','./bar']])
+    # generic 107 
+    TESTCASE_QUEUE.put([['hardlink',['./foo','./A/foo']],['hardlink',['./foo','./A/bar']],['sync'],['remove', './A/bar'], ['fsync','./foo']])
+    # generic 321
+    TESTCASE_QUEUE.put([['rename',['./foo','./A/foo']],['fsync','./A'],['fsync', './A/foo']])
+    # generic 322
+    TESTCASE_QUEUE.put([['rename',['./A/foo','./A/bar']],['fsync','./A/bar']])
+    # generic 335
+    TESTCASE_QUEUE.put([['rename',['./A/foo','./foo']],['creat','./bar'],['fsync','.']])
+    # generic 336
+    TESTCASE_QUEUE.put([['hardlink',['./A/foo','./B/foo']],['creat','./B/bar'],['sync'],['remove','./B/foo'],['rename',['./B/bar','C/bar']],['fsync','./A/foo']])
+    # generic 343
+    TESTCASE_QUEUE.put([['hardlink',['./A/foo','./A/bar']],['rename',['./B/baz','./A/baz'],['fsync', './A/foo']]])
+
+    # Init csv file
+    CSV_NAME = os.path.join(globalVar.get_value("CSV_PATH"), "csv_" + str(randint(0, 100000)) + ".csv")
+    globalVar.set_value("CSV_NAME", CSV_NAME) 
+    with open(CSV_NAME, 'w') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csv_header = ["No.testcase", "Inputs", "Target_mnt", "Adjoint_mnt"]
+        csvwriter.writerow(csv_header)
+        csvfile.close()
+    
+    globalVar.set_value("WORK_STATUS", "Init Done.")
 
 def arg_parse():
     # 参数解析
@@ -27,10 +65,10 @@ def arg_parse():
     
     return args
 
-
     # 是否需要进一步判断目标文件系统与顺序文件系统执行的信号
     # 若目标和伴随的比较没有发现不一致，则信号设为1,需要继续比较
     # 否则，为0，不需要继续比较
+
 def main():
     morecmp_signal = 1
     # 假设一开始具备strict-consistency
@@ -57,13 +95,15 @@ def main():
     
     fuzzer = Fuzzer("fuzzer", iskfs, fstype, fuzzer_event)
     fuzzer.start()
+    globalVar.set_value("WORK_STATUS", "Fuzzing")
     
-    # muta_pro.join()
-    # fuzzer.join()
-    start_tui([muta_pro, fuzzer])
+    muta_pro.join()
+    fuzzer.join()
+    # start_tui([muta_pro, fuzzer])
 
 
 if __name__ == '__main__':
+    init()
     main()
     logging.warning("[+] All work done.")
     # console.print(table)

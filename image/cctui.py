@@ -3,7 +3,8 @@ from pytermgui import Container, Label, Splitter, Button, InputField, Window
 import time
 from sys import exit
 from datetime import datetime
-from globalVar import TABLEINFO
+import globalVar
+from globalVar import *
 
 # TODO 移动到 globalVar 里头去
 START_TIME = datetime.now().timestamp()
@@ -35,6 +36,12 @@ def start_tui(thread_list):
         window = (
             Window( 
                 Container(
+                    Label("[bold accent]Status"),
+                    "",
+                    InputField(globalVar.get_value("WORK_STATUS"), prompt="status: "),
+                    "",
+                ),
+                Container(
                     Label("[bold accent]process timing"),
                     "",
                     InputField(f"[!time]{START_TIME}", prompt="run time: "),
@@ -47,9 +54,9 @@ def start_tui(thread_list):
                     "",
                     InputField(f"{TOTAL_PATHS}", prompt="total paths: "),
                     InputField(f"{UNIQ_CRASHES}", prompt="uniq crashes: "),
+                    InputField(f"{CSV_NAME}", prompt="report path: "),
                     "",
                 ),
-                TABLEINFO,
                 "",
                 ["Exit", lambda *_: exitting(manager, window, thread_list)],
                 width=80,

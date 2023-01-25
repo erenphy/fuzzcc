@@ -3,7 +3,9 @@ import threading
 import copy
 import tempfile
 import time
+import csv
 from globalVar import *
+import globalVar
 import ccparser
 import ccmounter
 from cctools import file_md5_hash
@@ -70,7 +72,6 @@ class Fuzzer(threading.Thread):
     def stop(self):
         self.done.set()
         self.event.set()
-        raise Exception("[-] Fuzzer stoped.")
 
 # runner() input为单个操作序列， output为执行后的镜像
 def runner(is_kernelfs, fs_type, input):
@@ -133,7 +134,12 @@ def runner(is_kernelfs, fs_type, input):
             
             # 将当前镜像target_img 和 adjoint_img的路径、和 input记录到logfile的一行
             logging.info(f"logging path -- target_img: {target_img}; adjoint_img: {adjoint_img}; input: {input}")
-            table.add_row(str(GLOBAL_COUNT), f"{input}", target_mnt, adjoint_mnt)
+            with open(globalVar.get_value("CSV_NAME"), "a+") as f:
+                row_data = [f"{GLOBAL_COUNT}", f"{input}", f"{target_img}", f"{adjoint_img}"]
+                writer = csv.writer(f)
+                writer.writerow(row_data)
+                f.close()
+
             # 还得删除，不然大实验跑不动
             umount_and_remove_path(target_img, target_mnt, adjoint_img, adjoint_mnt)
 

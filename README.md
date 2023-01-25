@@ -6,7 +6,7 @@
 - [ ] 重构代码
     - [ ] TUI 改为实时显示
     - [ ] 将能够导致crash的输入保存到csv文件中
-    - [ ] 文件结构重整
+    - [ ] 全局变量修改
 - [ ] Bug 修复
     - ~~`ccmounter.py` 中的 `userumount` 方法存在执行后不生效的情况~~
     - `ResourceWarning: unclosed file`

@@ -9,8 +9,30 @@ import enum, os
 from enum import IntEnum,auto
 import logging
 from time import strftime
-from rich.console import Console
-from rich.table import Column, Table
+from rich.table import Table
+
+# Init
+def _init(): 
+    global _global_dict
+    _global_dict = {
+        # TUI
+        "WORK_STATUS": "Initting",
+
+        # CSV
+        "CSV_PATH": "./reports/",
+        "CSV_NAME": None,
+    }
+
+def set_value(key, value):
+    # 定义一个全局变量
+    _global_dict[key] = value
+
+def get_value(key):
+    #获得一个全局变量，不存在则提示读取对应变量失败
+    try:
+        return _global_dict[key]
+    except:
+        print('读取'+key+'失败\r\n')
 
 
 # mkfs 所在路径
@@ -20,14 +42,6 @@ MKFS_PATH_PREFIX = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../
 # 日志记录相关
 log_file = os.path.join("logfiles", strftime('%m%d_%H:%M:%S') + '-syscalls.log' ) 
 logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s [%(levelname)s]: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-
-# 控制台
-console = Console()
-table = Table(show_header=True, header_style="bold magenta")
-table.add_column("NO.testcase", style="dim", width=12)
-table.add_column("Inputs ")
-table.add_column("Target_mnt")
-table.add_column("Adjoint_mnt")
 
 TABLEINFO = Table(show_header=True, header_style="bold magenta")
 TABLEINFO.add_column('INFO')
@@ -55,31 +69,7 @@ GLOBAL_CRASH_COUNT = 0
 
 # 测试用例队列
 TESTCASE_QUEUE = Queue()
-# TESTCASE_QUEUE = JoinableQueue()
-TESTCASE_QUEUE.put([['creat','./A/foo'],['sync'],['creat','./A/bar'],['fsync','./A']])
-TESTCASE_QUEUE.put([['hardlink',['./foo','./bar']],['sync'],['remove','./bar'],['creat','./bar'],['fsync','./bar']])
-TESTCASE_QUEUE.put([['write',['./foo','9']],['sync'],['fsync','./foo']])
-TESTCASE_QUEUE.put([['creat','./A/foo'],['sync'],['creat','./A/bar'],['fsync','./A']])
-TESTCASE_QUEUE.put([['hardlink',['./foo','./bar']],['sync'],['remove','./bar'],['fsync','./foo']])
-TESTCASE_QUEUE.put([['creat','./A/foo'],['sync'],['rename', ['./A','./B']],['mkdir','./A'],['fsync','./A']])
-TESTCASE_QUEUE.put([['rename',['./foo','./bar']],['creat','./foo'],['fsync','./bar']])
-TESTCASE_QUEUE.put([['creat','./foo'],['fsync','./foo'],['write',['./foo','9']],['fsync','./foo']])
-TESTCASE_QUEUE.put([['hardlink',['./foo','./A/foo']], ['hardlink',['./bar','./A/bar']],['fsync','./bar']])
-# generic 107 
-TESTCASE_QUEUE.put([['hardlink',['./foo','./A/foo']],['hardlink',['./foo','./A/bar']],['sync'],['remove', './A/bar'], ['fsync','./foo']])
-# generic 321
-TESTCASE_QUEUE.put([['rename',['./foo','./A/foo']],['fsync','./A'],['fsync', './A/foo']])
-# generic 322
-TESTCASE_QUEUE.put([['rename',['./A/foo','./A/bar']],['fsync','./A/bar']])
-# generic 335
-TESTCASE_QUEUE.put([['rename',['./A/foo','./foo']],['creat','./bar'],['fsync','.']])
-# generic 336
-TESTCASE_QUEUE.put([['hardlink',['./A/foo','./B/foo']],['creat','./B/bar'],['sync'],['remove','./B/foo'],['rename',['./B/bar','C/bar']],['fsync','./A/foo']])
-# generic 343
-TESTCASE_QUEUE.put([['hardlink',['./A/foo','./A/bar']],['rename',['./B/baz','./A/baz'],['fsync', './A/foo']]])
-
 # 种子队列
-# SEED_QUEUE = JoinableQueue() 
 SEED_QUEUE = Queue() 
 # 每条调用序列
 SYSCALLS = []
@@ -124,8 +114,3 @@ MY_DIR_LIST = ['./', './A']
 
 # 作为系统调用的参数：other
 MY_MNT_POINT = '/mnt/ext3' 
-
-
-# TUI 
-WORK_STATUS = 'INIT'
-EXIT_FLAG = False

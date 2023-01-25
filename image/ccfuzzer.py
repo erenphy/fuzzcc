@@ -24,6 +24,8 @@ class Fuzzer(threading.Thread):
             # 一次性把种子队列里头的种子都取出来，然后阻塞等待信号
             while not TESTCASE_QUEUE.empty():
                 cur_seq = TESTCASE_QUEUE.get()
+                # print('current seq')
+                # print(cur_seq)
                 cur_result = runner(self.iskfs, self.fstype, cur_seq)
                 if cur_result == 1:
                 # 比较的目标和伴随文件系统出现了不一致，则不需要进行目标文件系统和顺序文件系统的比较了
@@ -52,6 +54,12 @@ class Fuzzer(threading.Thread):
             #         print('well done! strictly consistency\n')
             # print("the end+++++++++++++++++++")
         print("[-] Fuzzer work done.")
+        print("Crash counts = " + str(GLOBAL_CRASH_COUNT))
+        # print("Seeds generated counts = " + str(GLOBAL_CRASH_COUNT + GLOBAL_SEED_COUNT))
+        print("Testcases counts = " + str(GLOBAL_COUNT))
+        logging.debug(f"Totally Testcases count = : {GLOBAL_COUNT}")
+        logging.debug(f"Totally Crash count = : {GLOBAL_CRASH_COUNT}")
+        # logging.debug(f"Totally Seeds generated count = : {GLOBAL_CRASH_COUNT + GLOBAL_SEED_COUNT}")
 
 # runner() input为单个操作序列， output为执行后的镜像
 def runner(is_kernelfs, fs_type, input):
@@ -62,6 +70,7 @@ def runner(is_kernelfs, fs_type, input):
     target_img = os.path.join(IMAGES_DIR, f"{GLOBAL_COUNT}.img")
     adjoint_img = os.path.join(IMAGES_DIR, f"{GLOBAL_COUNT}_adjoint.img")
     GLOBAL_COUNT += 1
+    global GLOBAL_CRASH_COUNT
     # lxh0120:增加参数fstype
     init_fs(fs_type, target_img, adjoint_img, init_files)
     
@@ -75,8 +84,8 @@ def runner(is_kernelfs, fs_type, input):
         target_mnt = tempfile.mkdtemp()
         adjoint_mnt = tempfile.mkdtemp()
         seq_mnt = tempfile.mkdtemp()
-        print('mount target dir: ' + target_mnt)
-        print('mount adjoint dir: ' + adjoint_mnt)
+        # print('mount target dir: ' + target_mnt)
+        # print('mount adjoint dir: ' + adjoint_mnt)
         # 暂时不实现挂载第三个系统
         # print('mount sequential dir: ' + seq_mnt)
 
@@ -85,7 +94,7 @@ def runner(is_kernelfs, fs_type, input):
         ccmounter.usermount(fs_type, target_img, target_mnt)
         ccmounter.usermount(fs_type, adjoint_img, adjoint_mnt)
         # parser 解释执行input
-        print("[+] Starting parser......\n")
+        # print("[+] Starting parser......\n")
         # lxh:目标文件系统上执行完立即解挂
         ccparser.cc_parser(target_mnt, input)
         ccparser.cc_parser(adjoint_mnt, input)
@@ -108,10 +117,13 @@ def runner(is_kernelfs, fs_type, input):
             print("Error: target_img and adjoint_img are not the same\n")
             # 设置发现不一致的信号
             diff_signal = 1
+            GLOBAL_CRASH_COUNT += 1
             SEED_QUEUE.put(input)
-
+            
             # 将当前镜像target_img 和 adjoint_img的路径、和 input记录到logfile的一行
             logging.info(f"logging path -- target_img: {target_img}; adjoint_img: {adjoint_img}; input: {input}")
+            # 还得删除，不然大实验跑不动
+            umount_and_remove_path(target_img, target_mnt, adjoint_img, adjoint_mnt)
 
         else:
             diff_signal = 0

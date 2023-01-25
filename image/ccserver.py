@@ -39,7 +39,7 @@ def main():
     iskfs = args.is_kernel_fs
     # targetimg = args.targetimg
     fstype = args.fs_type
-
+    tableinfo.add_row("FStype", fstype)
     logging.warning("ccserver start running...")
 
     gene_pro = Generator("generator", ARG_LENGTH)
@@ -63,6 +63,7 @@ def main():
     logging.warning("[+] Fuzzer work done.")
     print("[+] All work done.")
 
+
 if __name__ == '__main__':
     start = time.clock()
     main()
@@ -70,4 +71,8 @@ if __name__ == '__main__':
     end = time.clock()
     print('Fuzzing time: %f seconds '%(end-start))
     strtime = str(end - start)
-    logging.warning("Totally Fuzzing time = %s", strtime)
+    logging.critical("Totally Fuzzing time = %s", strtime)
+    tableinfo.add_row("Totally Fuzzing time(seconds)", strtime)
+    console.print(table)
+    console.print("------------DONE-----------")
+    console.print(tableinfo)

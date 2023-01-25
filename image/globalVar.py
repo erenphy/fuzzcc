@@ -9,6 +9,9 @@ import enum, os
 from enum import IntEnum,auto
 import logging
 from time import strftime
+from rich.console import Console
+from rich.table import Column, Table
+
 
 # mkfs 所在路径
 # MKFS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../specificfs", "xv6fs", "mkfs")
@@ -18,10 +21,23 @@ MKFS_PATH_PREFIX = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../
 log_file = os.path.join("logfiles", strftime('%m%d_%H:%M:%S') + '-syscalls.log' ) 
 logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s [%(levelname)s]: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
+# 控制台
+console = Console()
+table = Table(show_header=True, header_style="bold magenta")
+table.add_column("NO.testcase", style="dim", width=12)
+table.add_column("Inputs ")
+table.add_column("Target_mnt")
+table.add_column("Adjoint_mnt")
+
+tableinfo = Table(show_header=True, header_style="bold magenta")
+tableinfo.add_column('INFO')
+tableinfo.add_column('Details')
+
+
 # 暂时设置超时时间为 4
 TIME_OUT = 10
 # 产生序列的最大长度
-ARG_LENGTH = 3
+ARG_LENGTH = 7
 
 # 文件系统镜像文件所在目录
 IMAGES_DIR = "images"

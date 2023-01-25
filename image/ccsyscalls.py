@@ -42,15 +42,16 @@ def cccreat(mntpoint, filename):
         ccmkdir(mntpoint, pre_dir)
     if not os.path.exists(filepath):
         try:
-            print('start creat' + filepath)
+            # print('start creat' + filepath)
             fd = open(filepath, 'x')
-            print('creat done')
+            # print('creat done')
             fd.close()
         except:
-            print('creat--error --------------------missing creat')
+            # print('creat--error --------------------missing creat')
             pass
     else: 
-        print("already existed, not need creat")
+        # print("already existed, not need creat")
+        pass
         # log = 'creat ' + filename + '\n'
         # globalVar.log_file_handle.write(log)	
 
@@ -61,7 +62,7 @@ def ccappend(mntpoint, filename, Buf = False, Lseek = False, Fdatasync = False, 
     if Lseek:
         pos = random.randint(0, 2)
         how = random.randint(0, 2)
-        print(str(fd))
+        # print(str(fd))
         os.lseek(fd, pos, how)
         # print('\n new fd = ' + str(fd))
         # log = 'lseek ' + filename + ' ' + str(pos) + ' ' + str(how) + '\n'
@@ -90,7 +91,7 @@ def ccwrite(mntpoint, filename, Buf = False, Lseek = False, Fdatasync = False, F
     # if not os.path.exists(filepath):	
     #    openmod = openmod | os.O_CREAT
     fd = os.open(filepath, openmod)
-    os.write(fd, buf)
+    #os.write(fd, buf)
     if Lseek:
         pos = random.randint(0, 2)
         how = random.randint(0, 2)
@@ -134,23 +135,23 @@ def ccread(mntpoint, filename):
     return buf
 
 def ccrename(mntpoint, old, new):
-    print("Test RENAME\n")
+    # print("Test RENAME\n")
     oldpath = pjoin(mntpoint, old)
     newpath = pjoin(mntpoint, new)
     # print('rename decide: oldpath = ' + oldpath)
     is_file = oldpath.rsplit("/", 1)[1]
-    print('rename decide: ' + is_file)
+    # print('rename decide: ' + is_file)
     if is_file in globalVar.MY_FILE_LIST:
-        print('To rename file, first creat file')
+        # print('To rename file, first creat file')
         cccreat(mntpoint, is_file)
     else:
         # 不是文件，是目录
-        print('To rename dir, first mkdir')
+        # print('To rename dir, first mkdir')
         ccmkdir(mntpoint, is_file)
     # os.rename(oldpath, newpath)
     if os.path.exists(oldpath):
         try:
-            print('before rename ----------')
+            # print('before rename ----------')
             # os.rename(oldpath, newpath)
             file1 = oldpath.rsplit("/",1)[1]
             file2 = newpath.rsplit("/",1)[1]
@@ -162,9 +163,9 @@ def ccrename(mntpoint, old, new):
             print(mntcmd)
             proc = subprocess.Popen(mntcmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
             proc.wait()
-            print('rename done!!')
+            # print('rename done!!')
         except:
-            print('error --------------missing------rename-------------- ')
+            # print('error --------------missing------rename-------------- ')
             pass
     # log = 'rename ' + old + ' ' + new + '\n'
     # globalVar.log_file_handle.write(log)

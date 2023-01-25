@@ -21,20 +21,25 @@ logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s 
 # 暂时设置超时时间为 4
 TIME_OUT = 10
 # 产生序列的最大长度
-ARG_LENGTH = 4
+ARG_LENGTH = 3
 
 # 文件系统镜像文件所在目录
 IMAGES_DIR = "images"
 
-# 全局计数器
-GLOBAL_COUNT = 1
+# 全局计数器,用作测试用例数目
+GLOBAL_COUNT = 0
+# 用作变异次数计数
+GLOBAL_MUTATION_COUNT = 0
+# 用作初始种子生成计数 
+GLOBAL_SEED_COUNT = 0
+# 用作发现的crash计数，同时还是反馈的新种子计数
+GLOBAL_CRASH_COUNT = 0
+# 总的种子池为seed_count + crash_count
 
-COUNT = 0
 
 # 测试用例队列
 TESTCASE_QUEUE = Queue()
 # TESTCASE_QUEUE = JoinableQueue()
-
 TESTCASE_QUEUE.put([['creat','./A/foo'],['sync'],['creat','./A/bar'],['fsync','./A']])
 TESTCASE_QUEUE.put([['hardlink',['./foo','./bar']],['sync'],['remove','./bar'],['creat','./bar'],['fsync','./bar']])
 TESTCASE_QUEUE.put([['write',['./foo','9']],['sync'],['fsync','./foo']])
@@ -89,8 +94,8 @@ OPS_LENGTH = len(list(ops))
 DIR_FULL_SIZE = 15
 
 # 可修改，确定初始生成种子池的大小
-INIT_TIME_MAX = 16
-INIT_TIME_MIN = 10
+INIT_TIME_MAX = 40
+INIT_TIME_MIN = 20
 
 SMALL_DATA = 'abcdefgijklmnopqrst1234567890asdfghjkl;zxcvbnmqwertyuopifromLXH'
 BIG_DATA = 'a very very huge data size, waiting for appending, perheps from file'

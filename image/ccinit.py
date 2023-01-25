@@ -25,7 +25,7 @@ def init_fs(fs_type, fs01_filename, fs02_filename, init_files):
     if file_md5_hash(fs01_filename) != file_md5_hash(fs02_filename):
         print("initError: fs01 and fs02 are not the same")
         exit(1)
-    print("[+] Init Done.")
+    # print("[+] Init Done.")
 
 
 if __name__ == "__main__":

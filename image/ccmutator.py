@@ -1,15 +1,15 @@
 from os import pread
 import random
 from os.path import join as pjoin
+from queue import Queue
 import os
 import copy
 import time
 from random import randint
-import globalVar
 import ccgenerator
-import ccsyscalls
 import threading
-from globalVar import *
+import globalVar
+from globalVar import SEED_QUEUE, TESTCASE_QUEUE, GLOBAL_MUTATION_COUNT
 
 # 用于种子变异
 # 种子池 pop
@@ -31,18 +31,18 @@ class Mutator(threading.Thread):
             while not SEED_QUEUE.empty():
                 cur_seed = SEED_QUEUE.get()
                 # if cur_seed == None: break
-                print("mutator: printing cur_seed----")
-                print(cur_seed)
                 # TESTCASE_QUEUE.put(copy.deepcopy(cur_seed))
                 ccmutate_syscalls(TESTCASE_QUEUE, cur_seed)
                 self.fuzzer_event.set()
             # 阻塞等待信号
-            if not self.event.wait(timeout=TIME_OUT):
+            if not self.event.wait(timeout=globalVar.TIME_OUT):
                 if TESTCASE_QUEUE.empty():
                     break
                 time.sleep(1)
             self.event.clear()
         print("[-] Mutator work done.")
+        print("Mutation counts = " + str(GLOBAL_MUTATION_COUNT))
+        # globalVar.logging.debug(f"Totally Mutation counts = : {GLOBAL_MUTATION_COUNT}")
 
 
 def ccmutate_wtname(file):
@@ -75,37 +75,108 @@ def ccmutate_dir(dirpath):
 # 把变异后的每一个追加到testcaseq中
 def ccmutate_syscalls(testcaseq, syscall_list):
     syscall_len = len(syscall_list)
+    global GLOBAL_MUTATION_COUNT
     # 变异1：随机变换操作序列顺序
     rdmtime = randint(0, syscall_len - 1)
+    if syscall_len >= 3:
+        rdmtime +=2
     while rdmtime:
         random.shuffle(syscall_list)
         cur_syscalls = copy.deepcopy(syscall_list)
         testcaseq.put(cur_syscalls)
+        GLOBAL_MUTATION_COUNT += 1
+        # print("mutation 1 : counts = " + str(GLOBAL_MUTATION_COUNT))
         rdmtime = rdmtime - 1
-    # 变异2：随机加入检查点
+    # 变异2：顺序加入检查点
     rdmidx = randint(0, syscall_len - 1)
-    filename = ccgenerator.ccgene_file()
-    fsyncpnt = ['fsync', filename]
-    syncpnt = ['sync']
-    ckpnt = random.choice([fsyncpnt,syncpnt])
-    syscall_list.insert(rdmidx, ckpnt)
-    cur_syscalls = copy.deepcopy(syscall_list)
-    testcaseq.put(cur_syscalls)
+    for i in range(1, syscall_len - 1):
+        filename = ccgenerator.ccgene_file()
+        fsyncpnt = ['fsync', filename]
+        syncpnt = ['sync']
+        ckpnt = random.choice([fsyncpnt,syncpnt])
+        syscall_list.insert(rdmidx, ckpnt)
+        cur_syscalls = copy.deepcopy(syscall_list)
+        testcaseq.put(cur_syscalls)
+        GLOBAL_MUTATION_COUNT += 1
+    # print("mutation 2 : counts = " + str(GLOBAL_MUTATION_COUNT))
     # 变异3：变异参数
     for syscall in syscall_list:
         if syscall[0] == 'write' or syscall[0] == 'append':
             syscall[1] = ccmutate_wtname(syscall[1])
             syscall[2] = ccmutate_wtpara(syscall[2])
+        elif syscall[0] == 'hardlink' or syscall[0] == 'softlink':
+            syscall[1][1] = ccmutate_wtname(syscall[1][1])
+        elif syscall[0] == 'mkdir':
+            syscall[1] = ccmutate_dir(syscall[1])
+        elif syscall[0] == 'remove':
+            if syscall[1].rsplit("/", 1)[1] in globalVar.MY_FILE_LIST:
+                syscall[1] = ccmutate_wtname(syscall[1])
+            else: syscall[1] = ccmutate_dir(syscall[1])
+        elif syscall[0] == 'unlink':
+            syscall[1] = ccmutate_wtname(syscall[1])
+        elif syscall[0] == 'rmdir':
+            syscall[1] = ccmutate_dir(syscall[1])
+        elif syscall[0] == 'rename':
+            # 判断操作数是目录还是文件
+            if not syscall[1][0].rsplit("/", 1)[1] in globalVar.MY_FILE_LIST:
+                syscall[1][1] = ccmutate_dir(syscall[1][1])
+            else: syscall[1][1] = ccmutate_wtname(syscall[1][1])
+        elif syscall[0] == 'fsync':
+            syscall[1] = ccmutate_wtname(syscall[1])
         else:
             # 只给write和append变异参数
             pass
     cur_syscalls = copy.deepcopy(syscall_list)
     testcaseq.put(cur_syscalls)
+    GLOBAL_MUTATION_COUNT += 1
+    # print("mutation 3 : counts = " + str(GLOBAL_MUTATION_COUNT))
+
+def ccmutate_paras(testcaseq, syscall_list):
+    # syscall_list = copy.deepcopy(syscall_list)
+    for syscall in syscall_list:
+        if syscall[0] == 'write' or syscall[0] == 'append':
+            syscall[1] = ccmutate_wtname(syscall[1])
+            syscall[2] = ccmutate_wtpara(syscall[2])
+        elif syscall[0] == 'creat' or syscall[0] == 'read':
+            syscall[1] = ccmutate_wtname(syscall[1])
+        elif syscall[0] == 'hardlink' or syscall[0] == 'softlink':
+            syscall[1][1] = ccmutate_wtname(syscall[1][1])
+        elif syscall[0] == 'mkdir':
+            syscall[1] = ccmutate_dir(syscall[1])
+        elif syscall[0] == 'remove':
+            if syscall[1].rsplit("/", 1)[1] in globalVar.MY_FILE_LIST:
+                syscall[1] = ccmutate_wtname(syscall[1])
+            else: syscall[1] = ccmutate_dir(syscall[1])
+        elif syscall[0] == 'unlink':
+            syscall[1] = ccmutate_wtname(syscall[1])
+        elif syscall[0] == 'rmdir':
+            syscall[1] = ccmutate_dir(syscall[1])
+        elif syscall[0] == 'rename':
+            # 判断操作数是目录还是文件
+            if not syscall[1][0].rsplit("/", 1)[1] in globalVar.MY_FILE_LIST:
+                syscall[1][1] = ccmutate_dir(syscall[1][1])
+            else: syscall[1][1] = ccmutate_wtname(syscall[1][1])
+        elif syscall[0] == 'fsync':
+            syscall[1] = ccmutate_wtname(syscall[1])
+        elif syscall[0] == 'sync':
+            pass
+        else: 
+            print(".......mutator........not support..............\n")
+            pass
+        # print('\nsyscall_list is ')
+        # 只变了一个
+        cur_syscalls = copy.deepcopy(syscall_list)
+        testcaseq.put(cur_syscalls)
+
 
 if __name__ == '__main__':
     print("ccmutator.py is running\n")
     testcaseq = Queue()
-    syscall = [['hardlink',['./foo','./bar']],['sync'],['remove','./bar'],['creat','./bar'],['fsync','./bar']]
+    syscall = [['hardlink',['./baz','./bar']],['remove','./bar'],['creat','./bar'],['fsync','./bar']]
+    # len = len(syscall)
+    # while len:
+    #    ccmutate_paras(testcaseq, syscall)
+    #    len -= 1
     ccmutate_syscalls(testcaseq, syscall)
     print('finish mutating')
     while not testcaseq.empty():
@@ -113,8 +184,8 @@ if __name__ == '__main__':
     # ccgenerator.cc_generator(6)
     
 
-'''
-def ccmutate_syscalls(testcaseq, syscall_list):
+
+def ccmutate_paras(testcaseq, syscall_list):
     for syscall in syscall_list:
         if syscall[0] == 'write' or syscall[0] == 'append':
             syscall[1] = ccmutate_wtname(syscall[1])
@@ -148,4 +219,3 @@ def ccmutate_syscalls(testcaseq, syscall_list):
         # print('\nsyscall_list is ')
         cur_syscalls = copy.deepcopy(syscall_list)
         testcaseq.put(cur_syscalls)
-        '''

@@ -19,11 +19,11 @@ def init_fs(fs_type, fs01_filename, fs02_filename, init_files):
     _, stderr = proc_1.communicate()
     proc_2.communicate()
     if proc_1.returncode != 0 or proc_2.returncode != 0:
-        print("initError: mkfs failed")
+        # logging.error("initError: mkfs failed")
         logging.error(f"mkfs Error, stderr: {stderr}")
         exit(1)
     if file_md5_hash(fs01_filename) != file_md5_hash(fs02_filename):
-        print("initError: fs01 and fs02 are not the same")
+        logging.error("initError: fs01 and fs02 are not the same")
         exit(1)
     # print("[+] Init Done.")
 

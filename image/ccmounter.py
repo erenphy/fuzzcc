@@ -15,8 +15,7 @@ def kmount(fstype, device, mntpoint, options=[]):
         options += ['acl']
     elif fstype == 'reiserfs':
         options += ['acl', 'user_xattr']
-    print(['sudo', 'mount', '-o', ','.join(['loop'] + options),
-          '-t', fstype, device, mntpoint])
+    # print(['sudo', 'mount', '-o', ','.join(['loop'] + options), '-t', fstype, device, mntpoint])
     subprocess.check_call(
         ['sudo', 'mount', '-o', ','.join(['loop'] + options), '-t', fstype, device, mntpoint])
 
@@ -70,9 +69,9 @@ def cc_mounter(is_kernelfs, fs_type, target, input, output):
         mnt_target = tempfile.mkdtemp()
         mnt_adjoint = tempfile.mkdtemp()
         mnt_seq = tempfile.mkdtemp()
-        print('mount target dir: ' + mnt_target)
-        print('mount adjoint dir: ' + mnt_adjoint)
-        print('mount sequential dir: ' + mnt_seq)
+        # print('mount target dir: ' + mnt_target)
+        # print('mount adjoint dir: ' + mnt_adjoint)
+        # print('mount sequential dir: ' + mnt_seq)
         # kmount(fstype, device, mntdir)
         kmount(fs_type, target, mnt_target)
         kmount(fs_type, target, mnt_adjoint)
@@ -100,15 +99,15 @@ def cc_mounter(is_kernelfs, fs_type, target, input, output):
         mnt_target = tempfile.mkdtemp()
         mnt_adjoint = tempfile.mkdtemp()
         mnt_seq = tempfile.mkdtemp()
-        print('mount target dir: ' + mnt_target)
-        print('mount adjoint dir: ' + mnt_adjoint)
-        print('mount sequential dir: ' + mnt_seq)
+        # print('mount target dir: ' + mnt_target)
+        # print('mount adjoint dir: ' + mnt_adjoint)
+        # print('mount sequential dir: ' + mnt_seq)
         # usermount(specific fs path, mntdir,options)
         usermount(fs_type, target, mnt_target)
         # usermount(fs_type, target, mnt_adjoint)
         # for mnt_dir in [mnt_target, mnt_adjoint, mnt_seq]:
         #     chown(mnt_dir)
-        print("right here******************start parser\n")
+        # print("right here******************start parser\n")
         ccparser.cc_parser(mnt_target, input)
         userumount(mnt_target)
         usermount(fs_type, target, mnt_target)

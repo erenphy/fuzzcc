@@ -26,14 +26,15 @@ class Generator(threading.Thread):
         self.length=arg_length
     
     def run(self):
-        print(f"[+] {self.name} working...")
+        logging.critical(f"[+] {self.name} working...")
         global SEED_QUEUE
         global TABLEINFO
         # 初始测试用例随机数目
         init_size = randint(globalVar.INIT_TIME_MIN, globalVar.INIT_TIME_MAX)
-        print("\nInit seedpool size = " + str(init_size))
-        logging.critical(f"Totally Seeds generated count = : {init_size}")
+        # print("\nInit seedpool size = " + str(init_size))
+        logging.critical(f"init Seeds generated count = : {init_size}")
         TABLEINFO.add_row("Init Seedpool size", str(init_size))
+        globalVar.set_value("SEED_COUNT", init_size)
         while init_size:
             # 每条测试用例的长度随机生成
             # print("\ninit seedpool countdown" + str(init_size))

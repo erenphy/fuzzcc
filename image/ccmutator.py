@@ -24,11 +24,11 @@ class Mutator(threading.Thread):
         self.done = threading.Event()
 
     def run(self):
-        print(f"[+] {self.name} working...")
+        logging.critical(f"[+] {self.name} working...")
         global SEED_QUEUE
         global TESTCASE_QUEUE
         while True:
-            print("[-] mutator: getting SEED_QUEUE")
+            logging.critical("[-] mutator: getting SEED_QUEUE")
             # 一次性把种子队列里头的种子都取出来，然后阻塞等待信号
             while not SEED_QUEUE.empty() and not self.done.is_set():
                 cur_seed = SEED_QUEUE.get()
@@ -44,10 +44,10 @@ class Mutator(threading.Thread):
                     break
                 time.sleep(1)
             self.event.clear()
-        print("[-] Mutator work done.")
-        print("Mutation counts = " + str(GLOBAL_MUTATION_COUNT))
+        logging.critical("[-] Mutator work done.")
+        logging.critical("Mutation counts = " + str(GLOBAL_MUTATION_COUNT))
         # globalVar.logging.debug(f"Totally Mutation counts = : {GLOBAL_MUTATION_COUNT}")
-        logging.warning("[+] Mutator work done.")
+        logging.critical("[+] Mutator work done.")
 
     def stop(self):
         self.event.set()

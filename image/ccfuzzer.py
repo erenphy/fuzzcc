@@ -4,6 +4,7 @@ import copy
 import tempfile
 import time
 import csv
+from datetime import datetime
 from globalVar import *
 import globalVar
 import ccparser
@@ -20,7 +21,7 @@ class Fuzzer(threading.Thread):
         self.done = threading.Event()
 
     def run(self):
-        print(f"[+] {self.name} working...")
+        logging.critical(f"[+] {self.name} working...")
         global SEED_QUEUE
         global TESTCASE_QUEUE
         global TABLEINFO
@@ -82,6 +83,7 @@ def runner(is_kernelfs, fs_type, input):
     target_img = os.path.join(IMAGES_DIR, f"{GLOBAL_COUNT}.img")
     adjoint_img = os.path.join(IMAGES_DIR, f"{GLOBAL_COUNT}_adjoint.img")
     GLOBAL_COUNT += 1
+    globalVar.add_value("TOTAL_PATH")
     global GLOBAL_CRASH_COUNT
     # lxh0120:增加参数fstype
     init_fs(fs_type, target_img, adjoint_img, init_files)
@@ -126,12 +128,14 @@ def runner(is_kernelfs, fs_type, input):
 
         # 执行后调用hash校验对比两个img文件hash, 如果不一致则保存现场数据
         if file_md5_hash(target_img) != file_md5_hash(adjoint_img):
-            print("Error: target_img and adjoint_img are not the same\n")
+            logging.error("Error: target_img and adjoint_img are not the same\n")
             # 设置发现不一致的信号
             diff_signal = 1
             GLOBAL_CRASH_COUNT += 1
+            globalVar.add_value("UNIQ_CRASHES")
             SEED_QUEUE.put(input)
-            
+            globalVar.add_value("SEED_COUNT")
+            globalVar.set_value("LAST_CRASH_TIME", datetime.now().timestamp()) 
             # 将当前镜像target_img 和 adjoint_img的路径、和 input记录到logfile的一行
             logging.info(f"logging path -- target_img: {target_img}; adjoint_img: {adjoint_img}; input: {input}")
             with open(globalVar.get_value("CSV_NAME"), "a+") as f:

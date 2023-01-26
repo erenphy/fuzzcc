@@ -4,6 +4,7 @@ import logging
 import threading
 import time
 import csv
+from datetime import datetime
 from globalVar import ARG_LENGTH
 import globalVar
 from ccgenerator import *
@@ -45,7 +46,7 @@ def init():
         csv_header = ["No.testcase", "Inputs", "Target_mnt", "Adjoint_mnt"]
         csvwriter.writerow(csv_header)
         csvfile.close()
-    
+    globalVar.set_value("START_TIME", datetime.now().timestamp())
     globalVar.set_value("WORK_STATUS", "Init Done.")
 
 def arg_parse():
@@ -60,7 +61,7 @@ def arg_parse():
     args = parser.parse_args()
 
     if args.fs_type is None or not args.is_kernel_fs in ['0', '1'] :
-        print('Parameter-Error, check it out\n')
+        logging.error('Parameter-Error, check it out\n')
         sys.exit(1)
     
     return args
@@ -88,7 +89,7 @@ def main():
     muta_pro = Mutator("mutator", fuzzer_event)
     muta_pro.start()
 
-    print("[+] Waitting for generator work done...")
+    logging.warning("[+] Waitting for generator work done...")
     gene_pro.join()
     logging.warning("[+] Generator work done.")
     muta_pro.event.set()
@@ -99,11 +100,12 @@ def main():
     
     muta_pro.join()
     fuzzer.join()
-    # start_tui([muta_pro, fuzzer])
+    start_tui([muta_pro, fuzzer])
 
 
 if __name__ == '__main__':
     init()
+
     main()
     logging.warning("[+] All work done.")
     # console.print(table)

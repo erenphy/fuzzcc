@@ -20,6 +20,7 @@ def ccfsync(mntpoint, filename):
     #    return
     fd = os.open(filepath, os.O_CREAT | os.O_APPEND |os.O_RDWR)
     os.fsync(fd)
+    os.close(fd)
 def ccunlink(mntpoint, filename):
     abspath = pjoin(mntpoint, filename)
     if os.path.isfile(abspath):
@@ -160,7 +161,7 @@ def ccrename(mntpoint, old, new):
             op1 = '\'s/' + file1 + '/' + file2 + '/gm\''
             op2 = '*'
             mntcmd = f"{op0} {op} {op1} {op2}"
-            print(mntcmd)
+            # print(mntcmd)
             proc = subprocess.Popen(mntcmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
             proc.wait()
             # print('rename done!!')
